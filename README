@@ -1,0 +1,34 @@
+
+
+0) tables de hachages ajustees
+1) chargement stl, hachage sur z
+2) decoupe en tranches : 1 tranche = 1 ensemble de segments ; hachage sur x et y
+3) enlever parties communes ????? ----> normalement non, sauf si modele incorrect
+4) reconstruction de polygones
+5) arbre de classification de polygones
+6) creation de polygones a trous
+7) offsetter
+    a) decalage
+    b) intersections segments et arcs
+    c) construction de poches
+    d) arbre de classification des poches
+
+8) zip des tranches de poches
+    a) intersection segments et arcs
+    b) suppression des doublons
+    c) construction de poches
+    d) classification: qui est dans le ciel, qui est dans la terre ?
+
+9) remplissage:
+    a) ciel seul : creation de supports
+    b) terre seule : remplissage total (toit)
+    c) ciel et terre : remplissage partiel
+    d) rien : elimine
+
+10) graphes
+    a) tiling de motif sur rectangle englobant
+    b) intersection motif vs forme
+    c) clipping motif vs forme : classification : qui est dans la forme ?
+    d) creation du graphe
+
+11) parcours
