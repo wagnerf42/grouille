@@ -6,6 +6,7 @@ extern crate nalgebra;
 mod quadrant;
 pub use quadrant::Quadrant;
 mod hashes;
+pub use hashes::{CoordinatesHash, PointsHash};
 pub mod tycat;
 mod utils;
 

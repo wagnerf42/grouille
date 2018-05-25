@@ -1,6 +1,5 @@
 
 
-0) tables de hachages ajustees
 1) chargement stl, hachage sur z
 2) decoupe en tranches : 1 tranche = 1 ensemble de segments ; hachage sur x et y
 3) enlever parties communes ????? ----> normalement non, sauf si modele incorrect
