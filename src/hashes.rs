@@ -1,7 +1,7 @@
 //! We provide here tools for hashing (adjusting) points and coordinates.
+use super::Point;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
-use super::Point;
 
 /// Hash nearby coordinates together in O(1).
 pub struct CoordinatesHash {

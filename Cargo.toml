@@ -7,3 +7,4 @@ authors = ["frederic wagner <frederic.wagner@imag.fr>"]
 nalgebra="*"
 rand="*"
 itertools="*"
+byteorder="*"

@@ -101,10 +101,7 @@ pub fn display(quadrant: &Quadrant, svg_strings: &[String]) -> io::Result<()> {
     write!(
         svg_file,
         "viewBox=\"{} {} {} {}\" ",
-        xmin,
-        ymin,
-        width,
-        height
+        xmin, ymin, width, height
     )?;
     svg_file.write_all(b"xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n")?;
 
@@ -113,8 +110,7 @@ pub fn display(quadrant: &Quadrant, svg_strings: &[String]) -> io::Result<()> {
     write!(
         svg_file,
         "width=\"{}\" height=\"{}\" fill=\"white\"/>\n",
-        width,
-        height
+        width, height
     )?;
 
     // circle definition and stroke size

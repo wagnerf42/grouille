@@ -20,3 +20,13 @@ pub(crate) fn max<T: Borrow<f64>, U: Borrow<f64>>(a: T, b: U) -> f64 {
         _ => a.borrow().clone(),
     }
 }
+
+pub(crate) fn min_max<T: Borrow<f64>, U: Borrow<f64>>(a: T, b: U) -> (f64, f64) {
+    match a.borrow()
+        .partial_cmp(b.borrow())
+        .expect("failed comparing floats")
+    {
+        Ordering::Greater => (b.borrow().clone(), a.borrow().clone()),
+        _ => (a.borrow().clone(), b.borrow().clone()),
+    }
+}
