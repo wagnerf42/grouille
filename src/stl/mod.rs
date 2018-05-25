@@ -4,6 +4,7 @@
 mod facet;
 use byteorder::{LittleEndian, ReadBytesExt};
 use itertools::repeat_call;
+use std::f64::{INFINITY, NEG_INFINITY};
 use std::fs::File;
 use std::io::{BufReader, Error, Seek, SeekFrom};
 use stl::facet::Facet;
@@ -37,4 +38,43 @@ impl Stl {
             heights_hasher,
         })
     }
+
+    /// Prepare for cutting by generating all events.
+    fn generate_cutting_events<'a>(&'a self, thickness: f64) -> Vec<CuttingEvent<'a>> {
+        let ((z_min, z_max), mut events) =
+            self.facets.iter().map(|f| (f.heights_limits(), f)).fold(
+                (
+                    (INFINITY, NEG_INFINITY),
+                    Vec::with_capacity(3 * self.facets.len()),
+                ),
+                |((mut old_min, mut old_max), mut events), ((min, max), facet)| {
+                    if min < old_min {
+                        old_min = min;
+                    }
+                    if max > old_max {
+                        old_max = max;
+                    }
+                    events.push(CuttingEvent::FacetStart(min, facet));
+                    events.push(CuttingEvent::FacetEnd(max, facet));
+                    ((old_min, old_max), events)
+                },
+            );
+        events.extend(
+            (1..)
+                .scan(z_min, |&mut z, _| Some(z + thickness))
+                .map(|z| self.heights_hasher.add(z))
+                .take_while(|&z| z < z_max)
+                .map(|z| CuttingEvent::Cut(z)),
+        );
+        events
+    }
+}
+
+enum CuttingEvent<'a> {
+    /// Given facet appears at this height.
+    FacetEnd(f64, &'a Facet),
+    /// Given facet disappears at this height.
+    FacetStart(f64, &'a Facet),
+    /// We cut all alive facets at this height.
+    Cut(f64),
 }

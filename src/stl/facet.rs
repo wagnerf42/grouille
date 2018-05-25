@@ -3,6 +3,8 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use std::io::{Error, Read, Seek, SeekFrom};
 
 use itertools::Itertools;
+use itertools::MinMaxResult;
+
 use utils::min_max;
 use {CoordinatesHash, Point, Point3, PointsHash, Segment};
 
@@ -55,6 +57,15 @@ impl Facet {
             .filter(|i| i[0] != i[1])
             .next() // in fact, there can be no more than 1, so just take it
             .map(|i| Segment::new(i[0], i[1]))
+    }
+
+    /// Return our min and max z.
+    pub fn heights_limits(&self) -> (f64, f64) {
+        match self.points.iter().map(|p| p.z).minmax() {
+            MinMaxResult::MinMax(min, max) => (min, max),
+            MinMaxResult::OneElement(e) => (e, e),
+            _ => panic!("no way"),
+        }
     }
 }
 
