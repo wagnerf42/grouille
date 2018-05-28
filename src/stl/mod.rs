@@ -4,13 +4,13 @@
 mod facet;
 use byteorder::{LittleEndian, ReadBytesExt};
 use itertools::repeat_call;
+use std::cmp::Ordering;
+use std::collections::HashSet;
 use std::f64::{INFINITY, NEG_INFINITY};
 use std::fs::File;
 use std::io::{BufReader, Error, Seek, SeekFrom};
 use stl::facet::Facet;
 use {CoordinatesHash, PointsHash, Segment};
-use std::cmp::Ordering;
-use std::collections::HashSet;
 
 /// Loaded STL file as a set of facets.
 pub struct Stl {
@@ -63,7 +63,10 @@ impl Stl {
         );
         events.extend(
             (1..)
-                .scan(z_min, |&mut z, _| Some(z + thickness))
+                .scan(z_min, |z, _| {
+                    *z += thickness;
+                    Some(*z)
+                })
                 .map(|z| hasher.add(z))
                 .take_while(|&z| z < z_max)
                 .map(|z| CuttingEvent::Cut(z)),
@@ -106,7 +109,6 @@ enum CuttingEvent<'a> {
     /// We cut all alive facets at this height.
     Cut(f64),
 }
-
 
 impl<'a> CuttingEvent<'a> {
     fn height(&self) -> f64 {

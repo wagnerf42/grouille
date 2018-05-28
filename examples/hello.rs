@@ -11,6 +11,6 @@ fn main() {
     let points: Vec<_> = repeat_call(|| Point::new(random(), random()))
         .take(1000)
         .collect();
-    let o = Point::new(0.0, 0.0);
+    let o = Point::origin();
     tycat!(o, points);
 }

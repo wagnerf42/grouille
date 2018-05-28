@@ -2,13 +2,13 @@
 //! various graphical objects interactively on the console.
 //! We define here the `Tycat` trait which all shapes which can be displayed
 //! graphically need to implement.
-use super::Point;
-use super::Quadrant;
+use nalgebra::center;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
+use {Point, Quadrant, Segment};
 
 /// Anything displayable in terminology needs to implement this trait.
 pub trait Tycat {
@@ -24,6 +24,31 @@ impl Tycat for Point {
     }
     fn svg_string(&self) -> String {
         format!("<use xlink:href=\"#c\" x=\"{}\" y=\"{}\"/>", self.x, self.y)
+    }
+}
+
+impl Tycat for Segment {
+    fn quadrant(&self) -> Quadrant {
+        Quadrant::new().add(&self.start).add(&self.end)
+    }
+    fn svg_string(&self) -> String {
+        // We display a nice arrow at midpoint
+        let middle = center(&self.start, &self.end);
+        let v = self.end - self.start;
+        let angle = v.y.atan2(v.x);
+        format!(
+            "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\
+             <use xlink:href=\"#a\" x=\"{}\" y=\"{}\" transform=\"rotate({} {} {})\"/>",
+            self.start.x,
+            self.start.y,
+            self.end.x,
+            self.end.y,
+            middle.x,
+            middle.y,
+            angle.to_degrees(),
+            middle.x,
+            middle.y
+        )
     }
 }
 

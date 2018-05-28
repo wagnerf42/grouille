@@ -5,9 +5,9 @@ use std::io::{Error, Read, Seek, SeekFrom};
 use itertools::Itertools;
 use itertools::MinMaxResult;
 
+use std::hash::{Hash, Hasher};
 use utils::min_max;
 use {CoordinatesHash, Point, Point3, PointsHash, Segment};
-use std::hash::{Hash, Hasher};
 
 /// A `Facet` is just a triangle in space.
 #[derive(Debug)]
