@@ -7,12 +7,29 @@ use itertools::MinMaxResult;
 
 use utils::min_max;
 use {CoordinatesHash, Point, Point3, PointsHash, Segment};
+use std::hash::{Hash, Hasher};
 
 /// A `Facet` is just a triangle in space.
 #[derive(Debug)]
 pub struct Facet {
     points: [Point3<f64>; 3],
 }
+
+/// we hash references to facets (NOT FACETS).
+impl<'a> Hash for &'a Facet {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        ((*self) as *const _ as usize).hash(state)
+    }
+}
+
+/// we compare references to facets (NOT FACETS).
+impl<'a> PartialEq for &'a Facet {
+    fn eq(&self, other: &Self) -> bool {
+        (*self) as *const _ == (*other) as *const _
+    }
+}
+
+impl<'a> Eq for &'a Facet {}
 
 impl Facet {
     /// Parses binary content into of cursor on stl data into facet.
