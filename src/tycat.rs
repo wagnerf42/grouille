@@ -33,8 +33,8 @@ impl Tycat for Segment {
     }
     fn svg_string(&self) -> String {
         // We display a nice arrow at midpoint
-        let middle = center(&self.start, &self.end);
-        let v = self.end - self.start;
+        let middle = center(&self.start.0, &self.end.0);
+        let v = self.end.0 - self.start.0;
         let angle = v.y.atan2(v.x);
         format!(
             "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\

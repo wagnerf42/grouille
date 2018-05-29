@@ -88,7 +88,7 @@ impl Facet {
 
 /// Intersect given 3d segment at given height
 fn segment_intersection(start: &Point3<f64>, end: &Point3<f64>, height: f64) -> Option<Point> {
-    let (lower_z, higher_z) = min_max(start.z, end.z);
+    let [lower_z, higher_z] = min_max(start.z, end.z);
     if height < lower_z || height > higher_z {
         None
     } else {
