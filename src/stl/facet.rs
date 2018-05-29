@@ -12,7 +12,7 @@ use {CoordinatesHash, Point, Point3, PointsHash, Segment};
 /// A `Facet` is just a triangle in space.
 #[derive(Debug)]
 pub struct Facet {
-    points: [Point3<f64>; 3],
+    points: [Point3; 3],
 }
 
 /// we hash references to facets (NOT FACETS).
@@ -40,7 +40,7 @@ impl Facet {
         fn read_point<R: Read>(
             raw_data: &mut R,
             heights_hasher: &mut CoordinatesHash,
-        ) -> Result<Point3<f64>, Error> {
+        ) -> Result<Point3, Error> {
             let x = f64::from(raw_data.read_f32::<LittleEndian>()?);
             let y = f64::from(raw_data.read_f32::<LittleEndian>()?);
             let z = f64::from(raw_data.read_f32::<LittleEndian>()?);
@@ -87,7 +87,7 @@ impl Facet {
 }
 
 /// Intersect given 3d segment at given height
-fn segment_intersection(start: &Point3<f64>, end: &Point3<f64>, height: f64) -> Option<Point> {
+fn segment_intersection(start: &Point3, end: &Point3, height: f64) -> Option<Point> {
     let [lower_z, higher_z] = min_max(start.z, end.z);
     if height < lower_z || height > higher_z {
         None

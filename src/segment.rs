@@ -1,8 +1,8 @@
 //! 2d segments
 
-use nalgebra::{angle, Vector2};
 use utils::min_max;
 use {CoordinatesHash, HPoint, HashKey};
+use std::f64::consts::PI;
 
 /// 2d oriented segment
 #[derive(Debug)]
@@ -21,7 +21,14 @@ impl Segment {
 
     /// Returns supporting angle
     pub fn sweeping_angle(&self) -> f64 {
-        angle(&(&self.end.0 - &self.start.0), &Vector2::x_axis())
+        let angle = (self.end - self.start).angle();
+        if angle == PI {
+            0.0
+        } else if angle < 0.0 {
+            angle + PI
+        } else {
+            angle
+        }
     }
 
     /// Return our points ordered by lexicographically increasing coordinates.

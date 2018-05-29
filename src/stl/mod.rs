@@ -82,8 +82,8 @@ impl Stl {
         let mut alive_facets: HashSet<&Facet> = HashSet::with_capacity(events.len());
         let mut slices = Vec::new();
         for event in &events {
-            match event {
-                CuttingEvent::FacetEnd(_, f) => {
+            match *event {
+                CuttingEvent::FacetEnd(_, ref f) => {
                     alive_facets.remove(f);
                 }
                 CuttingEvent::FacetStart(_, f) => {
@@ -92,7 +92,7 @@ impl Stl {
                 CuttingEvent::Cut(h) => slices.push(
                     alive_facets
                         .iter()
-                        .filter_map(|f| f.intersect(*h, &mut points_hasher))
+                        .filter_map(|f| f.intersect(h, &mut points_hasher))
                         .collect(),
                 ),
             }
@@ -112,14 +112,14 @@ enum CuttingEvent<'a> {
 
 impl<'a> CuttingEvent<'a> {
     fn height(&self) -> f64 {
-        match self {
-            CuttingEvent::FacetEnd(h, _) => *h,
-            CuttingEvent::FacetStart(h, _) => *h,
-            CuttingEvent::Cut(h) => *h,
+        match *self {
+            CuttingEvent::FacetEnd(h, _) => h,
+            CuttingEvent::FacetStart(h, _) => h,
+            CuttingEvent::Cut(h) => h,
         }
     }
     fn type_order(&self) -> u8 {
-        match self {
+        match *self {
             CuttingEvent::FacetEnd(_, _) => 0,
             CuttingEvent::FacetStart(_, _) => 1,
             CuttingEvent::Cut(_) => 2,

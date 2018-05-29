@@ -1,12 +1,12 @@
 //! We provide here tools for hashing (adjusting) points and coordinates.
-use super::Point;
+use {Point, Vector};
 use num_traits::float::Float;
 use std::cmp::Ordering;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::mem;
-use std::ops::Deref;
+use std::ops::{Deref, Sub};
 
 /// Hashable floating points.
 /// This is possible because these keys can only be obtained through
@@ -48,6 +48,32 @@ impl Hash for HPoint {
 impl Ord for HPoint {
     fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap()
+    }
+}
+
+impl Sub for HPoint {
+    type Output = Vector;
+    fn sub(self, other: HPoint) -> Self::Output {
+        Vector::new(self.x - other.x, self.y - other.y)
+    }
+}
+
+impl<'a> Sub<&'a HPoint> for HPoint {
+    type Output = Vector;
+    fn sub(self, other: &HPoint) -> Self::Output {
+        Vector::new(self.x - other.x, self.y - other.y)
+    }
+}
+
+impl HPoint {
+    /// convert back to a standard point
+    pub fn to_point(self) -> Point {
+        self.0
+    }
+
+    /// Return center point between self and other (will be a `Point` not an `HPoint`).
+    pub fn center_with(&self, other: &HPoint) -> Point {
+        self.0.center_with(&other.0)
     }
 }
 
@@ -146,14 +172,14 @@ impl PointsHash {
     }
     /// Add given point to the hash. Modify point coordinates such that
     /// coordinates near from existing ones are shifted to existing values.
-    /// Example:
+    /// # Example:
     /// ```
     /// use grouille::{Point, PointsHash};
     /// let mut hasher = PointsHash::new(0.4);
     /// let p1 = hasher.add(Point::new(1.0, 3.5));
     /// let p2 = hasher.add(Point::new(1.3, 4.2));
-    /// assert_eq!(p1, Point::new(1.0, 3.5));
-    /// assert_eq!(p2, Point::new(1.0, 4.2)); // 4.2 is too far from 3.5 and is not shifted
+    /// assert_eq!(p1.to_point(), Point::new(1.0, 3.5));
+    /// assert_eq!(p2.to_point(), Point::new(1.0, 4.2)); // 4.2 is too far from 3.5 and is not shifted
     /// ```
     pub fn add(&mut self, mut point: Point) -> HPoint {
         point.x = self.hashes[0].add(point.x);

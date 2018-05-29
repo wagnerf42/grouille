@@ -1,6 +1,4 @@
 
-misc: implementer Point, HPoint et tous les operateurs
-
 3) enlever parties communes
 4) reconstruction de polygones
 5) arbre de classification de polygones

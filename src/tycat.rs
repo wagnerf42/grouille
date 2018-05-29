@@ -2,7 +2,6 @@
 //! various graphical objects interactively on the console.
 //! We define here the `Tycat` trait which all shapes which can be displayed
 //! graphically need to implement.
-use nalgebra::center;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
@@ -33,9 +32,8 @@ impl Tycat for Segment {
     }
     fn svg_string(&self) -> String {
         // We display a nice arrow at midpoint
-        let middle = center(&self.start.0, &self.end.0);
-        let v = self.end.0 - self.start.0;
-        let angle = v.y.atan2(v.x);
+        let middle = self.start.center_with(&self.end);
+        let angle = (self.end - self.start).angle();
         format!(
             "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\
              <use xlink:href=\"#a\" x=\"{}\" y=\"{}\" transform=\"rotate({} {} {})\"/>",
