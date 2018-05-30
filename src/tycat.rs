@@ -7,7 +7,7 @@ use std::io;
 use std::io::prelude::*;
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
-use {Point, Quadrant, Segment};
+use {HPoint, Point, Quadrant, Segment};
 
 /// Anything displayable in terminology needs to implement this trait.
 pub trait Tycat {
@@ -23,6 +23,18 @@ impl Tycat for Point {
     }
     fn svg_string(&self) -> String {
         format!("<use xlink:href=\"#c\" x=\"{}\" y=\"{}\"/>", self.x, self.y)
+    }
+}
+
+impl Tycat for HPoint {
+    fn quadrant(&self) -> Quadrant {
+        Quadrant::new().add(&self.0)
+    }
+    fn svg_string(&self) -> String {
+        format!(
+            "<use xlink:href=\"#c\" x=\"{}\" y=\"{}\"/>",
+            self.0.x, self.0.y
+        )
     }
 }
 

@@ -1,5 +1,4 @@
 //! We provide here tools for hashing (adjusting) points and coordinates.
-use {Point, Vector};
 use num_traits::float::Float;
 use std::cmp::Ordering;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
@@ -7,6 +6,7 @@ use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, Sub};
+use {Point, Vector};
 
 /// Hashable floating points.
 /// This is possible because these keys can only be obtained through

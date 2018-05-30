@@ -1,4 +1,4 @@
-#![feature(slice_patterns)]
+//#![feature(slice_patterns)]
 #![deny(missing_docs)]
 //! grouille is a geometry library for rust.
 //! It allows fast paths computations for different CNC machines.
@@ -16,6 +16,6 @@ pub mod segment;
 pub mod tycat;
 pub use segment::Segment;
 pub mod overlap;
-mod utils;
 mod point;
+mod utils;
 pub use point::{Point, Point3, Vector};

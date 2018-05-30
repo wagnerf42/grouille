@@ -1,8 +1,8 @@
 //! Quadrants delimit rectangular regions of 2d space.
 //! They have many uses like being simple shapes containing other more complex ones.
+use std::f64::{INFINITY, NEG_INFINITY};
 use utils::{max, min};
 use Point;
-use std::f64::{INFINITY, NEG_INFINITY};
 
 #[derive(Debug)]
 /// A `Quadrant` delimits a rectangular region in the plane.

@@ -1,8 +1,8 @@
 //! 2d segments
 
+use std::f64::consts::PI;
 use utils::min_max;
 use {CoordinatesHash, HPoint, HashKey};
-use std::f64::consts::PI;
 
 /// 2d oriented segment
 #[derive(Debug)]
