@@ -5,8 +5,7 @@ use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::mem;
-use std::ops::{Deref, Sub};
-use {Point, Vector};
+use Point;
 
 /// Hashable floating points.
 /// This is possible because these keys can only be obtained through
@@ -23,57 +22,16 @@ impl Hash for HashKey {
     }
 }
 
-/// Hashable points.
-/// This is possible because they can only be obtained through
-/// a `PointsHash`.
-#[derive(Copy, Clone, PartialEq, Debug, PartialOrd)]
-pub struct HPoint(pub Point);
-
-impl Deref for HPoint {
-    type Target = Point;
-    fn deref(&self) -> &Point {
-        &self.0
-    }
-}
-
-impl Eq for HPoint {}
-
-impl Hash for HPoint {
+impl Hash for Point {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        raw_double_bits(&self.0.x).hash(state);
-        raw_double_bits(&self.0.y).hash(state);
+        raw_double_bits(&self.x).hash(state);
+        raw_double_bits(&self.y).hash(state);
     }
 }
 
-impl Ord for HPoint {
+impl Ord for Point {
     fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap()
-    }
-}
-
-impl Sub for HPoint {
-    type Output = Vector;
-    fn sub(self, other: HPoint) -> Self::Output {
-        Vector::new(self.x - other.x, self.y - other.y)
-    }
-}
-
-impl<'a> Sub<&'a HPoint> for HPoint {
-    type Output = Vector;
-    fn sub(self, other: &HPoint) -> Self::Output {
-        Vector::new(self.x - other.x, self.y - other.y)
-    }
-}
-
-impl HPoint {
-    /// convert back to a standard point
-    pub fn to_point(self) -> Point {
-        self.0
-    }
-
-    /// Return center point between self and other (will be a `Point` not an `HPoint`).
-    pub fn center_with(&self, other: &HPoint) -> Point {
-        self.0.center_with(&other.0)
     }
 }
 
@@ -178,12 +136,10 @@ impl PointsHash {
     /// let mut hasher = PointsHash::new(0.4);
     /// let p1 = hasher.add(Point::new(1.0, 3.5));
     /// let p2 = hasher.add(Point::new(1.3, 4.2));
-    /// assert_eq!(p1.to_point(), Point::new(1.0, 3.5));
-    /// assert_eq!(p2.to_point(), Point::new(1.0, 4.2)); // 4.2 is too far from 3.5 and is not shifted
+    /// assert_eq!(p1, Point::new(1.0, 3.5));
+    /// assert_eq!(p2, Point::new(1.0, 4.2)); // 4.2 is too far from 3.5 and is not shifted
     /// ```
-    pub fn add(&mut self, mut point: Point) -> HPoint {
-        point.x = self.hashes[0].add(point.x);
-        point.y = self.hashes[1].add(point.y);
-        HPoint(point)
+    pub fn add(&mut self, point: Point) -> Point {
+        Point::new(self.hashes[0].add(point.x), self.hashes[1].add(point.y))
     }
 }

@@ -2,20 +2,20 @@
 
 use std::f64::consts::PI;
 use utils::min_max;
-use {CoordinatesHash, HPoint, HashKey};
+use {CoordinatesHash, HashKey, Point};
 
 /// 2d oriented segment
 #[derive(Debug)]
 pub struct Segment {
     /// starting point
-    pub start: HPoint,
+    pub start: Point,
     /// ending point
-    pub end: HPoint,
+    pub end: Point,
 }
 
 impl Segment {
     /// Create a new 2d segment
-    pub fn new(start: HPoint, end: HPoint) -> Self {
+    pub fn new(start: Point, end: Point) -> Self {
         Segment { start, end }
     }
 
@@ -32,7 +32,7 @@ impl Segment {
     }
 
     /// Return our points ordered by lexicographically increasing coordinates.
-    pub fn ordered_points(&self) -> [HPoint; 2] {
+    pub fn ordered_points(&self) -> [Point; 2] {
         min_max(&self.start, &self.end)
     }
 

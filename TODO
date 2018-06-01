@@ -1,5 +1,4 @@
 
-3) enlever parties communes
 4) reconstruction de polygones
 5) arbre de classification de polygones
 6) creation de polygones a trous
@@ -28,3 +27,7 @@
     d) creation du graphe
 
 11) parcours
+
+bonus:
+
+remettre les HPoint, avec un typage different pour chaque table

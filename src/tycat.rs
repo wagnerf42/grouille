@@ -5,9 +5,10 @@
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
+use std::iter::once;
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
-use {HPoint, Point, Quadrant, Segment};
+use {Point, Polygon, Quadrant, Segment};
 
 /// Anything displayable in terminology needs to implement this trait.
 pub trait Tycat {
@@ -23,18 +24,6 @@ impl Tycat for Point {
     }
     fn svg_string(&self) -> String {
         format!("<use xlink:href=\"#c\" x=\"{}\" y=\"{}\"/>", self.x, self.y)
-    }
-}
-
-impl Tycat for HPoint {
-    fn quadrant(&self) -> Quadrant {
-        Quadrant::new().add(&self.0)
-    }
-    fn svg_string(&self) -> String {
-        format!(
-            "<use xlink:href=\"#c\" x=\"{}\" y=\"{}\"/>",
-            self.0.x, self.0.y
-        )
     }
 }
 
@@ -73,6 +62,18 @@ impl<T: Tycat> Tycat for Vec<T> {
     }
     fn svg_string(&self) -> String {
         self.iter().map(|t| t.svg_string()).collect()
+    }
+}
+
+impl Tycat for Polygon {
+    fn quadrant(&self) -> Quadrant {
+        self.points.iter().fold(Quadrant::new(), |q, p| q.add(&p))
+    }
+    fn svg_string(&self) -> String {
+        once("<polygon points=\"".to_string())
+            .chain(self.points.iter().map(|p| format!(" {},{}", p.x, p.y)))
+            .chain(once("\" opacity=\"0.5\"/>".to_string()))
+            .collect()
     }
 }
 
