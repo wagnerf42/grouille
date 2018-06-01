@@ -1,6 +1,8 @@
 //! Polygon module.
 use Point;
 
+pub mod polygon_builder;
+
 /// Oriented polygons.
 #[derive(Debug)]
 pub struct Polygon {

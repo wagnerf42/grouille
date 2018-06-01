@@ -9,6 +9,7 @@ use std::collections::HashSet;
 use std::f64::{INFINITY, NEG_INFINITY};
 use std::fs::File;
 use std::io::{BufReader, Error, Seek, SeekFrom};
+use std::path::Path;
 use stl::facet::Facet;
 use {CoordinatesHash, PointsHash, Segment};
 
@@ -22,7 +23,7 @@ pub struct Stl {
 
 impl Stl {
     /// Loads a new stl model from given file.
-    pub fn new(filename: &str) -> Result<Stl, Error> {
+    pub fn new<P: AsRef<Path>>(filename: P) -> Result<Stl, Error> {
         let mut file = File::open(filename)?;
         //read header
         file.seek(SeekFrom::Start(80))?;

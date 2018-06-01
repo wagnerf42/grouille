@@ -19,6 +19,11 @@ impl Segment {
         Segment { start, end }
     }
 
+    /// Return segment in opposite direction
+    pub fn reverse(&self) -> Self {
+        Segment::new(self.end, self.start)
+    }
+
     /// Returns supporting angle
     pub fn sweeping_angle(&self) -> f64 {
         let angle = (self.end - self.start).angle();

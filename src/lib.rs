@@ -14,6 +14,7 @@ pub use hashes::{CoordinatesHash, HashKey, PointsHash};
 mod stl;
 pub use stl::Stl;
 pub mod segment;
+#[macro_use]
 pub mod tycat;
 pub use segment::Segment;
 pub mod overlap;
@@ -21,4 +22,5 @@ mod point;
 pub use point::{Point, Point3, Vector};
 mod polygon;
 pub use polygon::Polygon;
+pub mod slice;
 mod utils;
