@@ -5,7 +5,7 @@ use utils::min_max;
 use {CoordinatesHash, HashKey, Point};
 
 /// 2d oriented segment
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Segment {
     /// starting point
     pub start: Point,
