@@ -1,5 +1,7 @@
 //! Polygon module.
-use Point;
+use itertools::Itertools;
+use std::iter::once;
+use {Point, Quadrant};
 
 pub mod polygon_builder;
 
@@ -7,22 +9,49 @@ pub mod polygon_builder;
 #[derive(Debug)]
 pub struct Polygon {
     /// Vector of all points forming the edge of the polygon.
-    pub points: Vec<Point>,
+    points: Vec<Point>,
+    /// Min sized quadrant containing us.
+    pub quadrant: Quadrant,
+}
+
+/// Return area (SIGNED) of polygon delimited by given set of points.
+/// pre-condition: at least 3 points
+fn area(points: &[Point]) -> f64 {
+    assert!(points.len() >= 3);
+    points
+        .windows(2)
+        .chain(once(
+            vec![
+                points.last().cloned().unwrap(),
+                points.first().cloned().unwrap(),
+            ].as_slice(),
+        ))
+        .map(|p| p[0].x * p[1].y - p[0].y * p[1].x)
+        .sum::<f64>() / 2.0
 }
 
 impl Polygon {
     /// Create polygon out of given points vector.
     pub fn new(points: Vec<Point>) -> Polygon {
-        Polygon { points }
+        let poly = Polygon {
+            points,
+            quadrant: Quadrant::new(),
+        };
+        for point in &poly.points {
+            poly.quadrant.add(point);
+        }
+        poly
     }
+
+    /// Return a read-only iterator on our points.
+    pub fn points<'a>(&'a self) -> impl Iterator<Item = &'a Point> + 'a {
+        self.points.iter()
+    }
+
     /// Returns area taken by polygon.
     /// Negative or Positive depending on orientation.
     pub fn area(&self) -> f64 {
-        self.points
-            .iter()
-            .zip(self.points.iter().cycle().skip(1))
-            .map(|(p1, p2)| p1.x * p2.y - p1.y * p2.x)
-            .sum::<f64>() / 2.0
+        area(&self.points)
     }
 
     /// Returns if polygon is oriented clockwise (with respect to svg
@@ -112,37 +141,45 @@ impl Polygon {
     pub fn simplify(&self) -> Polygon {
         //remove all small triangles
         //when looping on 3 consecutive points
-        let triangle_area = |(p1, p2, p3): (&Point, &Point, &Point)| {
-            (p1.x * p2.y - p1.y * p2.x + p2.x * p3.y - p2.y * p3.x + p3.x * p1.y - p3.y * p1.x)
-                .abs() / 2.0
-        };
-        let new_points: Vec<Point> = izip!(
-            self.points.iter(),
-            self.points.iter().cycle().skip(1),
-            self.points.iter().cycle().skip(2)
-        ).filter_map(|points| {
-            if triangle_area(points) < 0.000001 {
-                None
-            } else {
-                Some(points.1)
-            }
-        })
-            .cloned()
+        let mut final_points: Vec<Point> = self
+            .points
+            .windows(3)
+            .chain(once(
+                vec![
+                    self.points[self.points.len() - 2],
+                    self.points.last().cloned().unwrap(),
+                    self.points.first().cloned().unwrap(),
+                ].as_slice(),
+            ))
+            .chain(once(
+                vec![
+                    self.points.last().cloned().unwrap(),
+                    self.points[0],
+                    self.points[1],
+                ].as_slice(),
+            ))
+            .filter_map(|points| {
+                if area(points).abs() > 0.00001 {
+                    None
+                } else {
+                    Some(points[1])
+                }
+            })
+            .tuple_windows()
+            .filter_map(|(p1, p2, p3)| {
+                if p1.is_aligned_with(&p2, &p3) {
+                    None
+                } else {
+                    Some(p2)
+                }
+            })
             .collect();
-
-        //now remove aligned points
-        let final_points: Vec<Point> = izip!(
-            new_points.iter(),
-            new_points.iter().cycle().skip(1),
-            new_points.iter().cycle().skip(2)
-        ).filter_map(|(p1, p2, p3)| {
-            if p1.is_aligned_with(p2, p3) {
-                None
-            } else {
-                Some(*p2)
-            }
-        })
-            .collect();
+        //now test last point for alignment
+        if final_points[final_points.len() - 2]
+            .is_aligned_with(final_points.last().unwrap(), final_points.first().unwrap())
+        {
+            final_points.pop();
+        }
 
         assert!(final_points.len() > 2);
         Polygon::new(final_points)

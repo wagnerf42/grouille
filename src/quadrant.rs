@@ -4,7 +4,7 @@ use std::f64::{INFINITY, NEG_INFINITY};
 use utils::{max, min};
 use Point;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 /// A `Quadrant` delimits a rectangular region in the plane.
 pub struct Quadrant {
     mins: [f64; 2],

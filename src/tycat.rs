@@ -67,11 +67,11 @@ impl<T: Tycat> Tycat for Vec<T> {
 
 impl Tycat for Polygon {
     fn quadrant(&self) -> Quadrant {
-        self.points.iter().fold(Quadrant::new(), |q, p| q.add(&p))
+        self.quadrant
     }
     fn svg_string(&self) -> String {
         once("<polygon points=\"".to_string())
-            .chain(self.points.iter().map(|p| format!(" {},{}", p.x, p.y)))
+            .chain(self.points().map(|p| format!(" {},{}", p.x, p.y)))
             .chain(once("\" opacity=\"0.5\"/>".to_string()))
             .collect()
     }

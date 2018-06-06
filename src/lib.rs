@@ -24,3 +24,4 @@ mod polygon;
 pub use polygon::Polygon;
 pub mod slice;
 mod utils;
+mod classifier;
