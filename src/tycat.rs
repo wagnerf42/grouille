@@ -63,6 +63,21 @@ impl<T: Tycat> Tycat for Vec<T> {
     fn svg_string(&self) -> String {
         self.iter().map(|t| t.svg_string()).collect()
     }
+
+}
+
+impl<'a, T: Tycat> Tycat for &'a[T] {
+    fn quadrant(&self) -> Quadrant {
+        self.iter()
+            .map(|t| t.quadrant())
+            .fold(Quadrant::new(), |mut acc, q| {
+                acc.update(&q);
+                acc
+            })
+    }
+    fn svg_string(&self) -> String {
+        self.iter().map(|t| t.svg_string()).collect()
+    }
 }
 
 impl Tycat for Polygon {
@@ -71,7 +86,7 @@ impl Tycat for Polygon {
     }
     fn svg_string(&self) -> String {
         once("<polygon points=\"".to_string())
-            .chain(self.points().map(|p| format!(" {},{}", p.x, p.y)))
+            .chain(self.points().iter().map(|p| format!(" {},{}", p.x, p.y)))
             .chain(once("\" opacity=\"0.5\"/>".to_string()))
             .collect()
     }

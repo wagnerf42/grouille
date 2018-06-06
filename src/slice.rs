@@ -13,7 +13,7 @@ pub fn slice<P: AsRef<Path>>(stl_file: P, thickness: f64) -> Result<(), Error> {
     for slice in &slices {
         let remaining_segments = cut_even_overlaps(slice);
         let polygons = build_polygons(&remaining_segments);
-        tycat!(polygons);
+        tycat!(&polygons);
     }
     Ok(())
 }

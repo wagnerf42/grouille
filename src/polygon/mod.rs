@@ -1,7 +1,7 @@
 //! Polygon module.
 use itertools::Itertools;
 use std::iter::once;
-use {Point, Quadrant};
+use {Point, Quadrant, Segment};
 
 pub mod polygon_builder;
 
@@ -33,19 +33,13 @@ fn area(points: &[Point]) -> f64 {
 impl Polygon {
     /// Create polygon out of given points vector.
     pub fn new(points: Vec<Point>) -> Polygon {
-        let poly = Polygon {
-            points,
-            quadrant: Quadrant::new(),
-        };
-        for point in &poly.points {
-            poly.quadrant.add(point);
-        }
-        poly
+        let quadrant = points.iter().fold(Quadrant::new(), |q, p| q.add(p));
+        Polygon { points, quadrant }
     }
 
-    /// Return a read-only iterator on our points.
-    pub fn points<'a>(&'a self) -> impl Iterator<Item = &'a Point> + 'a {
-        self.points.iter()
+    /// Return our points as a slice (read only).
+    pub fn points<'a>(&'a self) -> &'a [Point] {
+        &self.points
     }
 
     /// Returns area taken by polygon.
@@ -136,12 +130,12 @@ impl Polygon {
     ///     Point::new(-1.005, 0.002071000039577484)
     ///         ]);
     /// let simple_polygon = complex_polygon.simplify();
-    /// assert!(simple_polygon.points.len() == 24);
+    /// assert!(simple_polygon.points().len() == 24);
     /// ```
     pub fn simplify(&self) -> Polygon {
         //remove all small triangles
         //when looping on 3 consecutive points
-        let mut final_points: Vec<Point> = self
+        let intermediate_points: Vec<Point> = self
             .points
             .windows(3)
             .chain(once(
@@ -159,29 +153,77 @@ impl Polygon {
                 ].as_slice(),
             ))
             .filter_map(|points| {
-                if area(points).abs() > 0.00001 {
+                if area(points).abs() < 0.000001 {
                     None
                 } else {
                     Some(points[1])
                 }
             })
-            .tuple_windows()
-            .filter_map(|(p1, p2, p3)| {
-                if p1.is_aligned_with(&p2, &p3) {
+            .collect();
+
+        let final_points: Vec<Point> = intermediate_points
+            .windows(3)
+            .chain(once(
+                vec![
+                    intermediate_points[intermediate_points.len() - 2],
+                    intermediate_points.last().cloned().unwrap(),
+                    intermediate_points.first().cloned().unwrap(),
+                ].as_slice(),
+            ))
+            .chain(once(
+                vec![
+                    intermediate_points.last().cloned().unwrap(),
+                    intermediate_points[0],
+                    intermediate_points[1],
+                ].as_slice(),
+            ))
+            .filter_map(|p| {
+                if p[0].is_aligned_with(&p[1], &p[2]) {
                     None
                 } else {
-                    Some(p2)
+                    Some(p[1])
                 }
             })
             .collect();
-        //now test last point for alignment
-        if final_points[final_points.len() - 2]
-            .is_aligned_with(final_points.last().unwrap(), final_points.first().unwrap())
-        {
-            final_points.pop();
-        }
 
         assert!(final_points.len() > 2);
         Polygon::new(final_points)
+    }
+
+    /// return all intersecting x coordinates for a given y.
+    pub fn intersections_at_y<'a>(&'a self, y: f64) -> Vec<f64> {
+        self.points
+            .windows(3)
+            .chain(once(
+                vec![
+                    self.points[self.points.len() - 2],
+                    self.points.last().cloned().unwrap(),
+                    self.points.first().cloned().unwrap(),
+                ].as_slice(),
+            ))
+            .chain(once(
+                vec![
+                    self.points.last().cloned().unwrap(),
+                    self.points[0],
+                    self.points[1],
+                ].as_slice(),
+            ))
+            .filter_map(|points| {
+                if points[1].y == y {
+                    if points[0].y.partial_cmp(&y).unwrap() != points[2].y.partial_cmp(&y).unwrap()
+                    {
+                        Some(points[1].x)
+                    } else {
+                        None
+                    }
+                } else if points[1].y.partial_cmp(&y).unwrap()
+                    != points[2].y.partial_cmp(&y).unwrap()
+                {
+                    Some(Segment::new(points[1], points[2]).horizontal_line_intersection(y))
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 }

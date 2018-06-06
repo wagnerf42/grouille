@@ -3,7 +3,6 @@
 //! grouille is a geometry library for rust.
 //! It allows fast paths computations for different CNC machines.
 extern crate byteorder;
-#[macro_use]
 extern crate itertools;
 extern crate num_traits;
 
