@@ -51,6 +51,15 @@ impl Tycat for Segment {
     }
 }
 
+impl<'a, T: Tycat> Tycat for &'a T {
+    fn quadrant(&self) -> Quadrant {
+        (*self).quadrant()
+    }
+    fn svg_string(&self) -> String {
+        (*self).svg_string()
+    }
+}
+
 impl<T: Tycat> Tycat for Vec<T> {
     fn quadrant(&self) -> Quadrant {
         self.iter()
@@ -63,10 +72,9 @@ impl<T: Tycat> Tycat for Vec<T> {
     fn svg_string(&self) -> String {
         self.iter().map(|t| t.svg_string()).collect()
     }
-
 }
 
-impl<'a, T: Tycat> Tycat for &'a[T] {
+impl<'a, T: Tycat> Tycat for &'a [T] {
     fn quadrant(&self) -> Quadrant {
         self.iter()
             .map(|t| t.quadrant())

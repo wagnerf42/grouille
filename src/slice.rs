@@ -1,5 +1,6 @@
 //! This module contains the `slice` function which is the main
 //! entry point for slicers.
+use classifier;
 use overlap::cut_even_overlaps;
 use polygon::polygon_builder::build_polygons;
 use std::io::Error;
@@ -14,6 +15,10 @@ pub fn slice<P: AsRef<Path>>(stl_file: P, thickness: f64) -> Result<(), Error> {
         let remaining_segments = cut_even_overlaps(slice);
         let polygons = build_polygons(&remaining_segments);
         tycat!(&polygons);
+        let (classified, roots) = classifier::brute_force_classification(&polygons);
+        println!("root polygons are: ");
+        let root_polygons = roots.iter().map(|i| &polygons[*i]).collect::<Vec<_>>();
+        tycat!(root_polygons);
     }
     Ok(())
 }

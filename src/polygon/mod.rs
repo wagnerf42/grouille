@@ -1,5 +1,4 @@
 //! Polygon module.
-use itertools::Itertools;
 use std::iter::once;
 use streaming_iterator::StreamingIterator;
 use {utils::iterators::GrouilleSlice, Point, Quadrant, Segment};

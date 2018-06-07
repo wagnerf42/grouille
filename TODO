@@ -1,5 +1,7 @@
 
 5) arbre de classification de polygones
+-> kmerge au lieu du sort dans le brute force + interruption quand compte atteint ?
+
 6) creation de polygones a trous
 7) offsetter
     a) decalage
