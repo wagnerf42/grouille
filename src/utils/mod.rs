@@ -1,6 +1,8 @@
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 
+pub mod iterators;
+
 pub(crate) fn min<T: Borrow<f64>, U: Borrow<f64>>(a: T, b: U) -> f64 {
     match a.borrow()
         .partial_cmp(b.borrow())

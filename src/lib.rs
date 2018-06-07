@@ -5,6 +5,7 @@
 extern crate byteorder;
 extern crate itertools;
 extern crate num_traits;
+extern crate streaming_iterator;
 
 mod quadrant;
 pub use quadrant::Quadrant;
