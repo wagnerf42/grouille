@@ -1,7 +1,8 @@
 //! Polygon module.
 use itertools::Itertools;
 use std::iter::once;
-use {Point, Quadrant, Segment};
+use streaming_iterator::StreamingIterator;
+use {utils::iterators::GrouilleSlice, Point, Quadrant, Segment};
 
 pub mod polygon_builder;
 
@@ -135,8 +136,7 @@ impl Polygon {
     pub fn simplify(&self) -> Polygon {
         //remove all small triangles
         //when looping on 3 consecutive points
-        let intermediate_points: Vec<Point> = self
-            .points
+        let intermediate_points: Vec<Point> = self.points
             .windows(3)
             .chain(once(
                 vec![
@@ -191,24 +191,10 @@ impl Polygon {
     }
 
     /// return all intersecting x coordinates for a given y.
-    pub fn intersections_at_y<'a>(&'a self, y: f64) -> Vec<f64> {
+    pub fn intersections_at_y<'a>(&'a self, y: f64) -> impl Iterator<Item = f64> + 'a {
         self.points
-            .windows(3)
-            .chain(once(
-                vec![
-                    self.points[self.points.len() - 2],
-                    self.points.last().cloned().unwrap(),
-                    self.points.first().cloned().unwrap(),
-                ].as_slice(),
-            ))
-            .chain(once(
-                vec![
-                    self.points.last().cloned().unwrap(),
-                    self.points[0],
-                    self.points[1],
-                ].as_slice(),
-            ))
-            .filter_map(|points| {
+            .wrapping_windows(3)
+            .filter_map(move |points| {
                 if points[1].y == y {
                     if points[0].y.partial_cmp(&y).unwrap() != points[2].y.partial_cmp(&y).unwrap()
                     {
@@ -224,6 +210,6 @@ impl Polygon {
                     None
                 }
             })
-            .collect()
+            .cloned()
     }
 }

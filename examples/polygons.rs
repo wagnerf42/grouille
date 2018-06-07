@@ -73,10 +73,9 @@ fn main() {
     let simple_polygon = complex_polygon.simplify();
     tycat!(simple_polygon, simple_polygon.points());
     for y in [0.0, 1.0, 1.2].iter() {
-        let intersections = simple_polygon.intersections_at_y(*y);
-        let points = intersections
-            .iter()
-            .map(|x| Point::new(*x, *y))
+        let points = simple_polygon
+            .intersections_at_y(*y)
+            .map(|x| Point::new(x, *y))
             .collect::<Vec<_>>();
         tycat!(simple_polygon, points);
     }
