@@ -3,9 +3,16 @@ name = "grouille"
 version = "0.1.0"
 authors = ["frederic wagner <frederic.wagner@imag.fr>"]
 
+[dev-dependencies]
+criterion="*"
+
 [dependencies]
 rand="*"
 itertools="*"
 byteorder="*"
 num-traits="*"
 streaming-iterator="*"
+
+[[bench]]
+name = "stl_cut"
+harness = false
