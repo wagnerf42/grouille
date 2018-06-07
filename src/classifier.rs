@@ -1,42 +1,69 @@
 //! This module allows for the initial classification
 //! of polygons into a polygon tree.
-use tycat::Tycat;
-use {Polygon, Quadrant};
+use std::iter::repeat;
+use Polygon;
 
-enum Status<'a> {
-    Root,
-    Child(&'a Polygon),
-}
+/// Take some polygons to classify and return two vectors : classified ones and roots
+pub fn brute_force_classification<'a>(
+    polygons: &'a [Polygon],
+) -> (Vec<(usize, usize)>, Vec<usize>) {
+    // our results
+    let mut roots: Vec<usize> = Vec::with_capacity(polygons.len()); // indices of all root polygons
+    let mut classified: Vec<(usize, usize)> = Vec::with_capacity(polygons.len()); // (id, father_id)
 
-struct CPolygon<'a> {
-    polygon: &'a Polygon,
-    status: Status<'a>,
-    level: usize, // level in tree
-}
+    let mut fathers: Vec<usize> = (0..polygons.len()).collect(); // to each polygon its father (or self if none)
+    let mut polygons_indices = fathers.clone();
 
-/// Take a polygons slice.
-/// Return a vec<(father,level)> indicating
-/// for each polygon his father's index and its level in the
-/// tree. Root polygons are at level 0.
-/// pre-condition: no overlap, even on points.
-pub fn classify_polygons(polygons: &[Polygon]) -> Vec<(usize, usize)> {
-    let remaining_polygons: Vec<_> = polygons
-        .iter()
-        .map(|p| CPolygon {
-            polygon: p,
-            status: Status::Root,
-            level: 0,
-        })
-        .collect();
-    let global_quadrant = polygons.iter().fold(Quadrant::new(), |mut q, p| {
-        q.update(&p.quadrant);
-        q
-    });
-    unimplemented!()
-}
+    while !polygons_indices.is_empty() {
+        // take a y with at least one polygon
+        let y = polygons[*polygons_indices.first().unwrap()]
+            .points()
+            .first()
+            .unwrap()
+            .y;
+        // use this y to figure out all polygons relative positions here
+        let mut intersections = Vec::with_capacity(polygons.len() * 20);
+        let mut remaining_indices = Vec::with_capacity(polygons.len());
+        for index in polygons_indices {
+            let mut keep = true;
+            for x in polygons[index].intersections_at_y(y) {
+                intersections.push((x, index));
+                keep = false;
+            }
+            if keep {
+                remaining_indices.push(index);
+            }
+        }
+        intersections.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        // now we loop on all intersections, figuring out who is included in whom
+        let mut i = intersections.into_iter();
+        let (_, mut previous_one) = i.next().unwrap();
 
-/// Take some polygons to classify and return two vectors of polygons : roots and others
-fn brute_force_classification(polygons: Vec<CPolygon>) -> (Vec<CPolygon>, Vec<CPolygon>) {
-    let mut remaining_polygons = polygons;
-    unimplemented!()
+        let mut counts = repeat(0).take(polygons.len()).collect::<Vec<usize>>();
+        counts[previous_one] = 1;
+
+        for (_, index) in i {
+            if counts[index] == 0 {
+                // first time we see it, classify it
+                if counts[previous_one] % 2 == 1 {
+                    // we are included in neighbour : we are his son
+                    fathers[index] = previous_one;
+                    classified.push((index, fathers[index]));
+                } else {
+                    // we are not included in neighbour : we are his brother
+                    if fathers[previous_one] != previous_one {
+                        fathers[index] = fathers[previous_one];
+                        classified.push((index, fathers[index]));
+                    } else {
+                        roots.push(index);
+                    }
+                }
+            }
+            counts[index] += 1;
+            previous_one = index;
+        }
+
+        polygons_indices = remaining_indices;
+    }
+    (classified, roots)
 }

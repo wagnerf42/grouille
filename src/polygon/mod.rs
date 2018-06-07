@@ -137,21 +137,7 @@ impl Polygon {
         //remove all small triangles
         //when looping on 3 consecutive points
         let intermediate_points: Vec<Point> = self.points
-            .windows(3)
-            .chain(once(
-                vec![
-                    self.points[self.points.len() - 2],
-                    self.points.last().cloned().unwrap(),
-                    self.points.first().cloned().unwrap(),
-                ].as_slice(),
-            ))
-            .chain(once(
-                vec![
-                    self.points.last().cloned().unwrap(),
-                    self.points[0],
-                    self.points[1],
-                ].as_slice(),
-            ))
+            .wrapping_windows(3)
             .filter_map(|points| {
                 if area(points).abs() < 0.000001 {
                     None
@@ -159,24 +145,11 @@ impl Polygon {
                     Some(points[1])
                 }
             })
+            .cloned()
             .collect();
 
         let final_points: Vec<Point> = intermediate_points
-            .windows(3)
-            .chain(once(
-                vec![
-                    intermediate_points[intermediate_points.len() - 2],
-                    intermediate_points.last().cloned().unwrap(),
-                    intermediate_points.first().cloned().unwrap(),
-                ].as_slice(),
-            ))
-            .chain(once(
-                vec![
-                    intermediate_points.last().cloned().unwrap(),
-                    intermediate_points[0],
-                    intermediate_points[1],
-                ].as_slice(),
-            ))
+            .wrapping_windows(3)
             .filter_map(|p| {
                 if p[0].is_aligned_with(&p[1], &p[2]) {
                     None
@@ -184,6 +157,7 @@ impl Polygon {
                     Some(p[1])
                 }
             })
+            .cloned()
             .collect();
 
         assert!(final_points.len() > 2);
