@@ -10,7 +10,7 @@ use Point;
 /// Hashable floating points.
 /// This is possible because these keys can only be obtained through
 /// a `CoordinatesHash`.
-#[derive(PartialEq)]
+#[derive(PartialEq, PartialOrd, Copy, Clone)]
 pub struct HashKey(pub f64);
 
 impl Eq for HashKey {}
@@ -19,6 +19,12 @@ impl Eq for HashKey {}
 impl Hash for HashKey {
     fn hash<H: Hasher>(&self, state: &mut H) {
         raw_double_bits(&self.0).hash(state);
+    }
+}
+
+impl Ord for HashKey {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap()
     }
 }
 

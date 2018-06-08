@@ -11,7 +11,8 @@ use std::fs::File;
 use std::io::{BufReader, Error, Seek, SeekFrom};
 use std::path::Path;
 use stl::facet::Facet;
-use {CoordinatesHash, PointsHash, Segment};
+use {CoordinatesHash, HashKey, PointsHash, Segment};
+use std::collections::HashMap;
 
 /// Loaded STL file as a set of facets.
 pub struct Stl {
@@ -100,7 +101,39 @@ impl Stl {
         }
         slices
     }
+
+    /// cut stl regularly with slices of given thickness. (second algorithm)
+    pub fn cut2(&mut self, thickness: f64) -> Vec<Vec<Segment>> {
+        let mut points_hasher = PointsHash::new(0.001);
+        let mut slices = HashMap::new();
+        let heights_between = |(zmin, zmax)| {
+            (1..)
+                .scan(
+                    (zmin - zmin % thickness) / thickness,
+                    |h, _| -> Option<f64> {
+                        let old_h = *h; // we start below
+                        *h += thickness;
+                        Some(old_h)
+                    },
+                )
+                .take_while(move |h| *h <= zmax + thickness)
+        }; // and end above to avoid rounding problems
+
+        for facet in &self.facets {
+            for height in heights_between(facet.heights_limits()) {
+                let height = self.heights_hasher.key(height);
+                if let Some(segment) = facet.intersect(height.0, &mut points_hasher) {
+                    slices.entry(height).or_insert_with(Vec::new).push(segment);
+                }
+            }
+        }
+        let mut slices: Vec<(HashKey, Vec<Segment>)> = slices.drain().collect();
+        slices.sort_unstable_by_key(|e| e.0);
+        let final_slices: Vec<Vec<Segment>> = slices.drain(..).map(|(_, v)| v).collect();
+        final_slices
+    }
 }
+
 
 enum CuttingEvent<'a> {
     /// Given facet appears at this height.
