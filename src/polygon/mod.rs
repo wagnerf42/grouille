@@ -168,7 +168,9 @@ impl Polygon {
         self.points
             .wrapping_windows(3)
             .filter_map(move |points| {
-                if points[1].y == y {
+                if points[0].y == y || points[2].y == y {
+                    None
+                } else if points[1].y == y {
                     if points[0].y.partial_cmp(&y).unwrap() != points[2].y.partial_cmp(&y).unwrap()
                     {
                         Some(points[1].x)

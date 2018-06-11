@@ -77,6 +77,7 @@ fn main() {
             .intersections_at_y(*y)
             .map(|x| Point::new(x, *y))
             .collect::<Vec<_>>();
+        println!("{} points :", points.len());
         tycat!(simple_polygon, points);
     }
 }

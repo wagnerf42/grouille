@@ -17,7 +17,8 @@ pub fn brute_force_classification<'a>(
     while roots.len() + classified.len() != polygons.len() {
         // take a y with at least one not yet classified polygon
         let first_unclassified = (0..polygons.len()).find(|&i| fathers[i] == -1).unwrap();
-        let y = polygons[first_unclassified].points().first().unwrap().y;
+        let points = polygons[first_unclassified].points();
+        let y = (points[0].y + points[1].y) / 2.0;
         // use this y to figure out all polygons relative positions here
         let mut intersections = Vec::with_capacity(polygons.len() * 20);
         for (index, polygon) in polygons.iter().enumerate() {
@@ -46,7 +47,6 @@ pub fn brute_force_classification<'a>(
                     classified.push((index, fathers[index] as usize));
                 } else {
                     // we are not included in neighbour : we are his brother
-                    eprintln!("father of {} is {}", previous_one, fathers[previous_one]);
                     if fathers[previous_one] as usize != previous_one {
                         fathers[index] = fathers[previous_one];
                         classified.push((index, fathers[index] as usize));
