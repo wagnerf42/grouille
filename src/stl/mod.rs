@@ -142,7 +142,7 @@ impl Stl {
     /// All points are thus hashed with a temporary hasher.
     pub fn cut_at(&mut self, height: f64) -> Vec<Segment> {
         let height = self.heights_hasher.key(height);
-        let mut points_hasher = PointsHash::new(0.0001);
+        let mut points_hasher = PointsHash::new(0.001);
         self.facets
             .iter()
             .filter(|f| !f.is_horizontal())

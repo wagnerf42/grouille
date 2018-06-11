@@ -16,3 +16,7 @@ streaming-iterator="*"
 [[bench]]
 name = "stl_cut"
 harness = false
+
+[[bench]]
+name = "classifier"
+harness = false

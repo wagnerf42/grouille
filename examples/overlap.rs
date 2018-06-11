@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate grouille;
-use grouille::{overlap::cut_even_overlaps, Point, PointsHash, Segment};
+use grouille::{overlap::remove_overlaps, Point, PointsHash, Segment};
 
 fn main() {
     let mut hasher = PointsHash::new(0.0001);
@@ -32,7 +32,7 @@ fn main() {
     });
     println!("before removing overlaping parts:");
     tycat!(segments, points);
-    let remaining_segments = cut_even_overlaps(&segments);
+    let remaining_segments = remove_overlaps(&segments);
 
     println!("after:");
     tycat!(remaining_segments, points);

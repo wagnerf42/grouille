@@ -2,9 +2,8 @@
 use std::collections::HashMap;
 use {CoordinatesHash, HashKey, Point, Segment};
 
-/// When an even number of segments overlap (even partially) keep none of them.
-/// Will cut segments into smaller segments in case of partial overlap.
-pub fn cut_even_overlaps(segments: &[Segment]) -> Vec<Segment> {
+/// Remove overlapping segments.
+pub fn remove_overlaps(segments: &[Segment]) -> Vec<Segment> {
     let mut angles_hasher = CoordinatesHash::new(0.0001);
     let mut coordinates_hasher = CoordinatesHash::new(0.0001);
     let mut lines: HashMap<(HashKey, HashKey), HashMap<Point, isize>> = HashMap::new();
@@ -25,11 +24,11 @@ pub fn cut_even_overlaps(segments: &[Segment]) -> Vec<Segment> {
         let mut remaining = points.into_iter();
         let (mut previous_point, mut count) = remaining.next().unwrap();
         for (point, count_change) in remaining {
-            if count % 2 == 0 {
+            if count == 0 {
                 previous_point = point;
             }
             count += count_change;
-            if count % 2 == 0 {
+            if count == 0 {
                 non_overlapping_segments.push(Segment::new(previous_point, point));
             }
         }
