@@ -1,3 +1,4 @@
+//! build polygons by looping on outer edges.
 use point::Point;
 use polygon::Polygon;
 use segment::Segment;

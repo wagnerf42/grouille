@@ -5,6 +5,7 @@ mod facet;
 use byteorder::{LittleEndian, ReadBytesExt};
 use itertools::repeat_call;
 use std::cmp::Ordering;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::f64::{INFINITY, NEG_INFINITY};
 use std::fs::File;
@@ -12,7 +13,6 @@ use std::io::{BufReader, Error, Seek, SeekFrom};
 use std::path::Path;
 use stl::facet::Facet;
 use {CoordinatesHash, HashKey, PointsHash, Segment};
-use std::collections::HashMap;
 
 /// Loaded STL file as a set of facets.
 pub struct Stl {
@@ -46,23 +46,27 @@ impl Stl {
     /// Prepare for cutting by generating all events.
     fn generate_cutting_events<'a>(&'a mut self, thickness: f64) -> Vec<CuttingEvent<'a>> {
         let (facets, hasher) = (&self.facets, &mut self.heights_hasher);
-        let ((z_min, z_max), mut events) = facets.iter().map(|f| (f.heights_limits(), f)).fold(
-            (
-                (INFINITY, NEG_INFINITY),
-                Vec::with_capacity(3 * facets.len()),
-            ),
-            |((mut old_min, mut old_max), mut events), ((min, max), facet)| {
-                if min < old_min {
-                    old_min = min;
-                }
-                if max > old_max {
-                    old_max = max;
-                }
-                events.push(CuttingEvent::FacetStart(min, facet));
-                events.push(CuttingEvent::FacetEnd(max, facet));
-                ((old_min, old_max), events)
-            },
-        );
+        let ((z_min, z_max), mut events) = facets
+            .iter()
+            .filter(|f| !f.is_horizontal())
+            .map(|f| (f.heights_limits(), f))
+            .fold(
+                (
+                    (INFINITY, NEG_INFINITY),
+                    Vec::with_capacity(3 * facets.len()),
+                ),
+                |((mut old_min, mut old_max), mut events), ((min, max), facet)| {
+                    if min < old_min {
+                        old_min = min;
+                    }
+                    if max > old_max {
+                        old_max = max;
+                    }
+                    events.push(CuttingEvent::FacetStart(min, facet));
+                    events.push(CuttingEvent::FacetEnd(max, facet));
+                    ((old_min, old_max), events)
+                },
+            );
         events.extend(
             (1..)
                 .scan(z_min, |z, _| {
@@ -119,7 +123,7 @@ impl Stl {
                 .take_while(move |h| *h <= zmax + thickness)
         }; // and end above to avoid rounding problems
 
-        for facet in &self.facets {
+        for facet in self.facets.iter().filter(|f| !f.is_horizontal()) {
             for height in heights_between(facet.heights_limits()) {
                 let height = self.heights_hasher.key(height);
                 if let Some(segment) = facet.intersect(height.0, &mut points_hasher) {
@@ -132,8 +136,20 @@ impl Stl {
         let final_slices: Vec<Vec<Segment>> = slices.drain(..).map(|(_, v)| v).collect();
         final_slices
     }
-}
 
+    /// Cut just one slice at given height.
+    /// This is mainly used for debugging or test purposes.
+    /// All points are thus hashed with a temporary hasher.
+    pub fn cut_at(&mut self, height: f64) -> Vec<Segment> {
+        let height = self.heights_hasher.key(height);
+        let mut points_hasher = PointsHash::new(0.0001);
+        self.facets
+            .iter()
+            .filter(|f| !f.is_horizontal())
+            .filter_map(|f| f.intersect(height.0, &mut points_hasher))
+            .collect()
+    }
+}
 
 enum CuttingEvent<'a> {
     /// Given facet appears at this height.

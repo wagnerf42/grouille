@@ -61,6 +61,12 @@ impl Facet {
         raw_data.seek(SeekFrom::Current(2))?;
         Ok(new_facet)
     }
+
+    /// Are we a horizontal facet ?
+    pub fn is_horizontal(&self) -> bool {
+        self.points[0].z == self.points[1].z && self.points[1].z == self.points[2].z
+    }
+
     /// Return segment (at most one, do not call on horizontal facets) intersecting
     /// facet at given height (with rounded points).
     pub fn intersect(&self, height: f64, points_hasher: &mut PointsHash) -> Option<Segment> {
@@ -70,7 +76,7 @@ impl Facet {
             .filter_map(|(p1, p2)| {
                 segment_intersection(p1, p2, height).map(|p| points_hasher.add(p)) // cut them at height
             })
-            .combinations(2) // all horizontal segments between intersections
+            .combinations(2) // all segments between intersections
             .filter(|i| i[0] != i[1])
             .next() // in fact, there can be no more than 1, so just take it
             .map(|i| Segment::new(i[0], i[1]))
@@ -86,11 +92,14 @@ impl Facet {
     }
 }
 
-/// Intersect given 3d segment at given height
+/// Intersect given 3d segment at given height.
+/// Returns only one point.
 fn segment_intersection(start: &Point3, end: &Point3, height: f64) -> Option<Point> {
     let [lower_z, higher_z] = min_max(start.z, end.z);
     if height < lower_z || height > higher_z {
         None
+    } else if lower_z == height && higher_z == height {
+        None // No points considered in this case
     } else {
         let alpha = (height - start.z) / (end.z - start.z);
         let intersecting_x = start.x + alpha * (end.x - start.x);

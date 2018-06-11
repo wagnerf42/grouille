@@ -23,6 +23,8 @@ pub struct Vector {
 impl Point {
     /// Create a new 2d point from given coordinates.
     pub fn new(x: f64, y: f64) -> Point {
+        assert!(!x.is_nan());
+        assert!(!y.is_nan());
         Point { x, y }
     }
     /// Return the origin.

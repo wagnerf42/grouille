@@ -2,7 +2,7 @@
 
 use std::f64::consts::PI;
 use utils::min_max;
-use {CoordinatesHash, HashKey, Point};
+use {CoordinatesHash, HashKey, Point, Quadrant};
 
 /// 2d oriented segment
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -47,6 +47,13 @@ impl Segment {
     pub fn horizontal_line_intersection(&self, y: f64) -> f64 {
         let alpha = (y - self.start.y) / (self.end.y - self.start.y);
         alpha.mul_add(self.end.x - self.start.x, self.start.x)
+    }
+
+    /// Intersect self with given quadrant (limits).
+    /// Return min sized quadrant around resulting intersection or None if empty.
+    /// This is used in low complexity set intersections/classifications algorithms.
+    pub fn quadrant_intersection(&self, limits: &Quadrant) -> Option<Quadrant> {
+        unimplemented!()
     }
 
     /// Return hashable identifier of the line we lie uppon.
