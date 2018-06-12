@@ -6,7 +6,7 @@ use Polygon;
 /// Take some polygons to classify and return two vectors : classified ones and roots
 pub fn brute_force_classification<'a>(
     polygons: &'a [Polygon],
-) -> (Vec<(usize, usize)>, Vec<usize>) {
+) -> (Vec<(usize, usize)>, Vec<usize>, Vec<isize>) {
     // our results
     let mut roots: Vec<usize> = Vec::with_capacity(polygons.len()); // indices of all root polygons
     let mut classified: Vec<(usize, usize)> = Vec::with_capacity(polygons.len()); // (id, father_id)
@@ -63,5 +63,5 @@ pub fn brute_force_classification<'a>(
             previous_one = index;
         }
     }
-    (classified, roots)
+    (classified, roots, fathers)
 }

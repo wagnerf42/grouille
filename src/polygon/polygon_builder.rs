@@ -59,11 +59,11 @@ fn build_polygon(
     let polygon = Polygon::new(polygon_points);
     let area = polygon.area();
     //TODO: check which orientation we really want and adjust increment in find next accordingly
-    if area > -0.00001 {
+    if area < 0.00001 {
         // discard both flat and badly oriented polygons
         None
     } else {
-        //keep only reverse-clockwise polygons
+        //keep only clockwise polygons
         Some(polygon.simplify())
     }
 }

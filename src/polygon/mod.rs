@@ -48,6 +48,11 @@ impl Polygon {
         area(&self.points)
     }
 
+    /// Reverse polygon orientation in place.
+    pub fn reverse(&mut self) {
+        self.points.reverse()
+    }
+
     /// Returns if polygon is oriented clockwise (with respect to svg
     /// orientation)
     pub fn is_oriented_clockwise(&self) -> bool {
