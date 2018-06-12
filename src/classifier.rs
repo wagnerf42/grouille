@@ -22,8 +22,11 @@ pub fn brute_force_classification<'a>(
         // use this y to figure out all polygons relative positions here
         let mut intersections = Vec::with_capacity(polygons.len() * 20);
         for (index, polygon) in polygons.iter().enumerate() {
-            for x in polygon.intersections_at_y(y) {
-                intersections.push((x, index));
+            let (polygon_ymin, polygon_ymax) = polygon.quadrant.limits(1);
+            if y >= polygon_ymin && y <= polygon_ymax {
+                for x in polygon.intersections_at_y(y) {
+                    intersections.push((x, index));
+                }
             }
         }
         intersections.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());

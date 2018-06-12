@@ -24,4 +24,6 @@ pub mod polygon;
 pub use polygon::Polygon;
 pub mod classifier;
 pub mod slice;
+pub mod holed_polygon;
+pub use holed_polygon::HoledPolygon;
 mod utils;

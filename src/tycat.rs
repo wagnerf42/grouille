@@ -8,7 +8,7 @@ use std::io::prelude::*;
 use std::iter::once;
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
-use {Point, Polygon, Quadrant, Segment};
+use {HoledPolygon, Point, Polygon, Quadrant, Segment};
 
 /// Anything displayable in terminology needs to implement this trait.
 pub trait Tycat {
@@ -100,6 +100,29 @@ impl Tycat for Polygon {
         once("<polygon points=\"".to_string())
             .chain(self.points().iter().map(|p| format!(" {},{}", p.x, p.y)))
             .chain(once("\" opacity=\"0.5\"/>".to_string()))
+            .collect()
+    }
+}
+
+/// Turn polygon into svg path.
+fn polygon_path<'a>(polygon: &'a Polygon) -> impl Iterator<Item = String> + 'a {
+    let mut points = polygon.points().iter().map(|p| format!("{} {} ", p.x, p.y));
+    let start = points.next().unwrap();
+    once(format!("M {} L ", start)).chain(points)
+}
+
+impl Tycat for HoledPolygon {
+    fn quadrant(&self) -> Quadrant {
+        self.outer_polygon.quadrant
+    }
+    fn svg_string(&self) -> String {
+        once("<path d=\"".to_string())
+            .chain(
+                once(&self.outer_polygon) // clockwise
+                    .chain(self.holes.iter()) // counter clockwise
+                    .flat_map(|p| polygon_path(p)),
+            )
+            .chain(once("\" />".to_string()))
             .collect()
     }
 }
