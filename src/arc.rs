@@ -37,8 +37,9 @@ impl Arc {
     /// Given center was not completely right, move it slightly.
     /// This can happen for example when endpoints have been rounded.
     fn adjust_center(&mut self) {
-        self.center = *self.compute_centers()
-            .iter()
+        self.center = self
+            .possible_centers()
+            .into_iter()
             .min_by(|c1, c2| {
                 c1.distance_to(&self.center)
                     .partial_cmp(&c2.distance_to(&self.center))
@@ -48,23 +49,21 @@ impl Arc {
     }
 
     /// Return array of the two centers we could have.
-    fn compute_centers(&self) -> Vec<Point> {
+    fn possible_centers(&self) -> Vec<Point> {
         // we do some geometry to avoid too complex equations.
         // take start as origin
         let support = self.end - self.start;
-        let middle = self.start.center_with(self.end);
+        let middle = self.start.center_with(&self.end);
         // find bisector
         let bisector_point = middle + support.perpendicular_vector();
         let line = Segment::new(middle, bisector_point);
-        let centers = line_circle_intersections(&line, &self.start, self.radius);
-        assert_eq!(centers.len(), 2);
+        let centers = line_circle_intersections(&line, &self.start, self.radius).collect();
         centers
     }
 
     /// Return normalized angle of points with center.
     pub fn angle(&self) -> f64 {
-        (self.center.angle_with(&self.start) - self.center.angle_with(&self.end) + 2.0 * PI)
-            % (2.0 * PI)
+        ((self.start - self.center).angle() - (self.end - self.center).angle()) % (2.0 * PI)
     }
 
     /// Return the arc's length.
@@ -154,7 +153,7 @@ impl Arc {
     ///                   PI/4.0));
     /// ```
     pub fn tangent_angle(&self, tangent_point: &Point) -> f64 {
-        let base_angle = self.center.angle_with(tangent_point);
+        let base_angle = (tangent_point - self.center).angle();
         (base_angle + FRAC_PI_2) % PI
     }
 

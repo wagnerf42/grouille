@@ -13,6 +13,7 @@ pub struct Point {
 
 impl Eq for Point {}
 
+#[derive(Copy, Clone)]
 /// a vector stores the difference between two points
 pub struct Vector {
     /// x component

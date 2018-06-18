@@ -24,6 +24,14 @@ impl Segment {
         Segment::new(self.end, self.start)
     }
 
+    /// Do we contain given point ?
+    pub fn contains(&self, point: &Point) -> bool {
+        is_almost(
+            self.start.distance_to(point) + self.end.distance_to(point),
+            self.start.distance_to(&self.end),
+        )
+    }
+
     /// Returns supporting angle
     pub fn sweeping_angle(&self) -> f64 {
         let angle = (self.end - self.start).angle();
