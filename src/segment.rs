@@ -1,7 +1,7 @@
 //! 2d segments
 
 use std::f64::consts::PI;
-use utils::min_max;
+use utils::{is_almost, min_max};
 use {CoordinatesHash, HashKey, Point};
 
 /// 2d oriented segment
@@ -39,6 +39,31 @@ impl Segment {
     /// Return our points ordered by lexicographically increasing coordinates.
     pub fn ordered_points(&self) -> [Point; 2] {
         min_max(&self.start, &self.end)
+    }
+
+    /// Intersects two segments.
+    pub fn intersection_with(&self, other: &Segment) -> Option<Point> {
+        // we solve system obtained by considering the point is inside both segments.
+        // p = self.start + alpha * self.direction_vector()
+        // p = other.start + beta * self.direction_vector()
+        let d = self.end - self.start;
+        let d2 = other.end - other.start;
+        let denominator = d2.x * d.y - d.x * d2.y;
+        if is_almost(denominator, 0.0) {
+            None // almost parallel lines
+        } else {
+            let alpha = (d2.x * (other.start.y - self.start.y)
+                + d2.y * (self.start.x - other.start.x)) / denominator;
+            let beta = (d.x * (other.start.y - self.start.y) + d.y * (self.start.x - other.start.x))
+                / denominator;
+            if (is_almost(0.0, alpha) || is_almost(1.0, alpha) || (0.0 < alpha && alpha < 1.0))
+                && (is_almost(0.0, beta) || is_almost(1.0, beta) || (0.0 < beta && beta < 1.0))
+            {
+                Some(self.start + d * alpha)
+            } else {
+                None
+            }
+        }
     }
 
     /// Intersect with horizontal line at given y.

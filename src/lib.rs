@@ -27,3 +27,5 @@ pub mod slice;
 pub mod holed_polygon;
 pub use holed_polygon::HoledPolygon;
 mod utils;
+pub mod arc;
+pub use arc::{Arc};

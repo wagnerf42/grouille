@@ -1,5 +1,6 @@
 //! We define a simple 2d point here together with vectors.
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Div, Mul, Sub};
+use utils::is_almost;
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 /// 2d point
@@ -27,6 +28,17 @@ impl Point {
         assert!(!y.is_nan());
         Point { x, y }
     }
+
+    /// Return distance between two points.
+    pub fn distance_to(&self, other: &Self) -> f64 {
+        (other - self).norm()
+    }
+
+    /// Are two given points almost the same ?
+    pub fn is_almost(&self, other: &Self) -> bool {
+        is_almost(self.x, other.x) && is_almost(self.y, other.y)
+    }
+
     /// Return the origin.
     pub fn origin() -> Point {
         Point::new(0.0, 0.0)
@@ -48,6 +60,19 @@ impl Vector {
     /// Create a new 2d vector.
     pub fn new(x: f64, y: f64) -> Vector {
         Vector { x, y }
+    }
+
+    /// Return a perpendicular vector.
+    pub fn perpendicular_vector(&self) -> Vector {
+        Vector {
+            x: -self.y,
+            y: self.x,
+        }
+    }
+
+    /// Return the vector's euclidean norm.
+    pub fn norm(&self) -> f64 {
+        (self.x * self.x + self.y * self.y).sqrt()
     }
 
     /// Compute angle between vector and x axis (will be strictly less than PI).
@@ -154,6 +179,26 @@ impl<'a> Mul<f64> for &'a Vector {
         Vector {
             x: self.x * c,
             y: self.y * c,
+        }
+    }
+}
+
+impl Div<f64> for Vector {
+    type Output = Vector;
+    fn div(self, d: f64) -> Self::Output {
+        Vector {
+            x: self.x / d,
+            y: self.y / d,
+        }
+    }
+}
+
+impl<'a> Div<f64> for &'a Vector {
+    type Output = Vector;
+    fn div(self, d: f64) -> Self::Output {
+        Vector {
+            x: self.x / d,
+            y: self.y / d,
         }
     }
 }
