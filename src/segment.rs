@@ -5,7 +5,7 @@ use utils::{is_almost, min_max};
 use {CoordinatesHash, HashKey, Point};
 
 /// 2d oriented segment
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub struct Segment {
     /// starting point
     pub start: Point,
@@ -17,6 +17,11 @@ impl Segment {
     /// Create a new 2d segment
     pub fn new(start: Point, end: Point) -> Self {
         Segment { start, end }
+    }
+
+    /// Return our length
+    pub fn length(&self) -> f64 {
+        (self.end - self.start).norm()
     }
 
     /// Return segment in opposite direction

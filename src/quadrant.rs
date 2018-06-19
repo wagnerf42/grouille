@@ -7,8 +7,10 @@ use Point;
 #[derive(Debug, Copy, Clone)]
 /// A `Quadrant` delimits a rectangular region in the plane.
 pub struct Quadrant {
-    mins: [f64; 2],
-    maxs: [f64; 2],
+    /// all min values allowed for each coordinate
+    pub(crate) mins: [f64; 2],
+    /// all max values allowed for each coordinate
+    pub(crate) maxs: [f64; 2],
 }
 
 impl Quadrant {

@@ -2,13 +2,14 @@
 //! various graphical objects interactively on the console.
 //! We define here the `Tycat` trait which all shapes which can be displayed
 //! graphically need to implement.
+use std::f64::consts::{FRAC_PI_2, PI};
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 use std::iter::once;
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
-use {HoledPolygon, Point, Polygon, Quadrant, Segment};
+use {Arc, ElementaryPath, HoledPolygon, Point, Polygon, Quadrant, Segment, Vector};
 
 /// Anything displayable in terminology needs to implement this trait.
 pub trait Tycat {
@@ -124,6 +125,77 @@ impl Tycat for HoledPolygon {
             )
             .chain(once("\" />".to_string()))
             .collect()
+    }
+}
+
+impl Tycat for Arc {
+    fn quadrant(&self) -> Quadrant {
+        Quadrant {
+            mins: [self.center.x - self.radius, self.center.y - self.radius],
+            maxs: [self.center.x + self.radius, self.center.y + self.radius],
+        }
+    }
+    fn svg_string(&self) -> String {
+        let center_string = self.center.svg_string();
+        // go always for the small arc
+        let sweep_flag = if self.angle() > PI { 1 } else { 0 };
+        let arc_string = format!(
+            "<path d=\"M{},{} A{},{} 0 0,{} {},{}\" fill=\"none\"/>",
+            self.start.x,
+            self.start.y,
+            self.radius,
+            self.radius,
+            sweep_flag,
+            self.end.x,
+            self.end.y
+        );
+        // now draw a small arrow indicating orientation
+        let mut middle_angle =
+            ((self.start - self.center).angle() + (self.end - self.center).angle()) / 2.0;
+        // we need to figure out where is the middle point between two candidates
+        let possible_points = [
+            self.center + Vector::polar(self.radius, middle_angle),
+            self.center + Vector::polar(self.radius, middle_angle + PI),
+        ];
+        let distances = [
+            self.start.distance_to(&possible_points[0]),
+            self.start.distance_to(&possible_points[1]),
+        ];
+        let tangent_point = if distances[0] < distances[1] {
+            possible_points[0]
+        } else {
+            middle_angle += PI;
+            possible_points[1]
+        };
+        let tangent_angle = if sweep_flag == 1 {
+            middle_angle + FRAC_PI_2
+        } else {
+            middle_angle - FRAC_PI_2
+        };
+        let arrow_string = format!(
+            "<use xlink:href=\"#a\" x=\"{}\" y=\"{}\" transform=\"rotate({} {} {})\"/>",
+            tangent_point.x,
+            tangent_point.y,
+            tangent_angle * 180.0 / PI,
+            tangent_point.x,
+            tangent_point.y
+        );
+        center_string + &arc_string + &arrow_string
+    }
+}
+
+impl Tycat for ElementaryPath {
+    fn quadrant(&self) -> Quadrant {
+        match *self {
+            ElementaryPath::Arc(ref a) => a.quadrant(),
+            ElementaryPath::Segment(ref s) => s.quadrant(),
+        }
+    }
+    fn svg_string(&self) -> String {
+        match *self {
+            ElementaryPath::Arc(ref a) => a.svg_string(),
+            ElementaryPath::Segment(ref s) => s.svg_string(),
+        }
     }
 }
 

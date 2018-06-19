@@ -29,3 +29,5 @@ pub use holed_polygon::HoledPolygon;
 mod utils;
 pub mod arc;
 pub use arc::{Arc};
+pub mod elementary_path;
+pub use elementary_path::ElementaryPath;

@@ -63,6 +63,14 @@ impl Vector {
         Vector { x, y }
     }
 
+    /// Create a new 2d vector from polar coordinates.
+    pub fn polar(r: f64, angle: f64) -> Vector {
+        Vector {
+            x: r * angle.cos(),
+            y: r * angle.sin(),
+        }
+    }
+
     /// Return a perpendicular vector.
     pub fn perpendicular_vector(&self) -> Vector {
         Vector {
