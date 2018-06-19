@@ -1,5 +1,6 @@
 //! Provides `HoledPolygon` structure.
 use classifier::brute_force_classification;
+use intersections::intersect_paths;
 use itertools::repeat_call;
 use std::iter::repeat;
 use {PointsHash, Polygon};
@@ -31,6 +32,8 @@ impl HoledPolygon {
             paths.append(&mut hole.inner_paths(radius, points_hasher));
         }
         tycat!(self.outer_polygon, paths);
+        let small_paths = intersect_paths(&paths, points_hasher);
+        tycat!(self.outer_polygon, small_paths);
     }
 }
 

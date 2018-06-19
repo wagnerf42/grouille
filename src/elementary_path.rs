@@ -55,6 +55,17 @@ impl ElementaryPath {
         }
     }
 
+    /// Create a sub-path between given points.
+    /// pre-condition: given points are on ourselves.
+    pub fn sub_path(&self, start: Point, end: Point) -> ElementaryPath {
+        match *self {
+            ElementaryPath::Segment(_) => ElementaryPath::Segment(Segment::new(start, end)),
+            ElementaryPath::Arc(ref a) => {
+                ElementaryPath::Arc(Arc::new(start, end, a.center, a.radius))
+            }
+        }
+    }
+
     /// Return endpoint which is not the given one.
     /// pre-condition: point given is an endpoint.
     pub fn other_endpoint(&self, endpoint: &Point) -> &Point {
@@ -62,6 +73,29 @@ impl ElementaryPath {
             self.end()
         } else {
             self.start()
+        }
+    }
+
+    /// Iterate on all intersections (including possibly endpoints themselves)
+    /// with other path.
+    pub fn intersections_with<'a>(&'a self, other: &'a Self) -> Box<Iterator<Item = Point> + 'a> {
+        match *self {
+            ElementaryPath::Arc(ref a) => match *other {
+                ElementaryPath::Arc(ref a2) => {
+                    Box::new(a.intersections_with_arc(a2)) as Box<Iterator<Item = Point>>
+                }
+                ElementaryPath::Segment(ref s2) => {
+                    Box::new(a.intersections_with_segment(s2)) as Box<Iterator<Item = Point>>
+                }
+            },
+            ElementaryPath::Segment(ref s) => match *other {
+                ElementaryPath::Arc(ref a2) => {
+                    Box::new(a2.intersections_with_segment(s)) as Box<Iterator<Item = Point>>
+                }
+                ElementaryPath::Segment(ref s2) => {
+                    Box::new(s.intersection_with(s2).into_iter()) as Box<Iterator<Item = Point>>
+                }
+            },
         }
     }
 }
