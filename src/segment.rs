@@ -16,6 +16,7 @@ pub struct Segment {
 impl Segment {
     /// Create a new 2d segment
     pub fn new(start: Point, end: Point) -> Self {
+        assert!(start != end);
         Segment { start, end }
     }
 

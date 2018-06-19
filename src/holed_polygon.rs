@@ -2,7 +2,7 @@
 use classifier::brute_force_classification;
 use itertools::repeat_call;
 use std::iter::repeat;
-use Polygon;
+use {PointsHash, Polygon};
 
 /// polygon with (optional) holes inside.
 #[derive(Debug)]
@@ -22,6 +22,15 @@ impl HoledPolygon {
             outer_polygon,
             holes,
         }
+    }
+
+    /// Offset holed polygon into holed pockets
+    pub fn offset(&self, radius: f64, points_hasher: &mut PointsHash) {
+        let mut paths = self.outer_polygon.inner_paths(radius, points_hasher);
+        for hole in &self.holes {
+            paths.append(&mut hole.inner_paths(radius, points_hasher));
+        }
+        tycat!(self.outer_polygon, paths);
     }
 }
 

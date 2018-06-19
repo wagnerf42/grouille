@@ -82,9 +82,8 @@ impl Stl {
     }
 
     /// cut stl regularly with slices of given thickness.
-    pub fn cut(&mut self, thickness: f64) -> Vec<Vec<Segment>> {
+    pub fn cut(&mut self, thickness: f64, points_hasher: &mut PointsHash) -> Vec<Vec<Segment>> {
         let events = self.generate_cutting_events(thickness);
-        let mut points_hasher = PointsHash::new(0.001);
         let mut alive_facets: HashSet<&Facet> = HashSet::with_capacity(events.len());
         let mut slices = Vec::new();
         for event in &events {
@@ -98,7 +97,7 @@ impl Stl {
                 CuttingEvent::Cut(h) => slices.push(
                     alive_facets
                         .iter()
-                        .filter_map(|f| f.intersect(h, &mut points_hasher))
+                        .filter_map(|f| f.intersect(h, points_hasher))
                         .collect(),
                 ),
             }

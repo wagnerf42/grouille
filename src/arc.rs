@@ -20,6 +20,7 @@ pub struct Arc {
 impl Arc {
     /// Create a new arc.
     pub fn new(start: Point, end: Point, center: Point, radius: f64) -> Arc {
+        assert!(start != end);
         let mut arc = Arc {
             start,
             end,
@@ -43,9 +44,9 @@ impl Arc {
             .min_by(|c1, c2| {
                 c1.distance_to(&self.center)
                     .partial_cmp(&c2.distance_to(&self.center))
-                    .unwrap()
+                    .expect("failed comparing center distances")
             })
-            .unwrap();
+            .expect("no center found");
     }
 
     /// Return array of the two centers we could have.
@@ -105,15 +106,6 @@ impl Arc {
 
     /// Intersect ourselves with horizontal line at given y.
     /// pre-condition: there is exactly one intersection
-    ///
-    /// # Example
-    /// ```
-    /// use jimn::{Point, Arc};
-    /// let arc = Arc::new(Point::new(1.0, 0.0), Point::new(0.0, -1.0), Point::new(0.0, 0.0), 1.0);
-    /// let half_coordinate = 1.0/(2.0 as f64).sqrt();
-    /// let half_point = arc.horizontal_line_intersection(-half_coordinate);
-    /// assert!(half_point.is_almost(&Point::new(half_coordinate, -half_coordinate)));
-    /// ```
     pub fn horizontal_line_intersection(&self, y: f64) -> Point {
         // we use pythagoras
         let side_length = (y - self.center.y).abs();
@@ -139,19 +131,6 @@ impl Arc {
 
     /// Return angle for tangent at given point.
     /// pre-condition: we contain given point.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use jimn::{Point, Arc};
-    /// use std::f64::consts::PI;
-    /// use jimn::utils::precision::is_almost;
-    ///
-    /// let arc = Arc::new(Point::new(1.0, 0.0), Point::new(0.0, -1.0), Point::new(0.0, 0.0), 1.0);
-    /// let half_coordinate = 1.0/(2.0 as f64).sqrt();
-    /// assert!(is_almost(arc.tangent_angle(&Point::new(half_coordinate, -half_coordinate)),
-    ///                   PI/4.0));
-    /// ```
     pub fn tangent_angle(&self, tangent_point: &Point) -> f64 {
         let base_angle = (tangent_point - self.center).angle();
         (base_angle + FRAC_PI_2) % PI

@@ -1,7 +1,7 @@
 //! Polygon module.
 use std::iter::once;
 use streaming_iterator::StreamingIterator;
-use {utils::iterators::GrouilleSlice, Point, Quadrant, Segment};
+use {utils::iterators::GrouilleSlice, Arc, ElementaryPath, Point, PointsHash, Quadrant, Segment};
 
 pub mod polygon_builder;
 
@@ -140,7 +140,8 @@ impl Polygon {
     pub fn simplify(&self) -> Polygon {
         //remove all small triangles
         //when looping on 3 consecutive points
-        let intermediate_points: Vec<Point> = self.points
+        let intermediate_points: Vec<Point> = self
+            .points
             .wrapping_windows(3)
             .filter_map(|points| {
                 if area(points).abs() < 0.000001 {
@@ -191,5 +192,34 @@ impl Polygon {
                 }
             })
             .cloned()
+    }
+
+    /// Return vector of elementary paths obtained when displacing all segments internally by given
+    /// radius. All segments are joined by arcs.
+    /// This is used in offsetter.
+    pub(crate) fn inner_paths(
+        &self,
+        radius: f64,
+        points_hasher: &mut PointsHash,
+    ) -> Vec<ElementaryPath> {
+        let mut segments: Vec<ElementaryPath> = self
+            .points
+            .wrapping_windows(2)
+            .map(|p| {
+                let s = Segment::new(p[0], p[1]);
+                ElementaryPath::parallel_segment(&s, radius, true, points_hasher)
+            })
+            .cloned()
+            .collect();
+
+        let mut arcs: Vec<ElementaryPath> = segments
+            .wrapping_windows(2)
+            .map(|s| (*s[0].end(), *s[1].start()))
+            .cloned()
+            .zip(self.points.iter().cycle().skip(1))
+            .map(|(s, c)| ElementaryPath::Arc(Arc::new(s.0, s.1, *c, radius)))
+            .collect();
+        segments.append(&mut arcs);
+        segments
     }
 }

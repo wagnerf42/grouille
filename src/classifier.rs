@@ -3,7 +3,7 @@
 use std::iter::repeat;
 use Polygon;
 
-/// Take some polygons to classify and return two vectors : classified ones and roots
+/// Take some polygons to classify and return three vectors : classified ones, roots, fathers
 pub fn brute_force_classification<'a>(
     polygons: &'a [Polygon],
 ) -> (Vec<(usize, usize)>, Vec<usize>, Vec<isize>) {
