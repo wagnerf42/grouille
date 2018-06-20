@@ -9,7 +9,7 @@ use std::io::prelude::*;
 use std::iter::once;
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
-use {Arc, ElementaryPath, HoledPolygon, Point, Polygon, Quadrant, Segment, Vector};
+use {Arc, ElementaryPath, HoledPolygon, Pocket, Point, Polygon, Quadrant, Segment, Vector};
 
 /// Anything displayable in terminology needs to implement this trait.
 pub trait Tycat {
@@ -38,7 +38,10 @@ impl Tycat for Segment {
         //let angle = (self.end - self.start).angle();
         format!(
             "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>",
-            self.start.x, self.start.y, self.end.x, self.end.y,
+            self.start.x,
+            self.start.y,
+            self.end.x,
+            self.end.y,
         )
         //        format!(
         //            "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\
@@ -199,6 +202,39 @@ impl Tycat for ElementaryPath {
     }
 }
 
+impl Tycat for Pocket {
+    fn quadrant(&self) -> Quadrant {
+        self.quadrant
+    }
+    fn svg_string(&self) -> String {
+        if let Some(first_path) = self.edge.first() {
+            let starting_point = first_path.start();
+            once(format!(
+                "<path d=\"M{},{}",
+                starting_point.x,
+                starting_point.y
+            )).chain(self.edge.iter().map(|p| match *p {
+                ElementaryPath::Segment(ref s) => format!(" L {} {}", s.end.x, s.end.y),
+                ElementaryPath::Arc(ref a) => {
+                    let sweep_flag = if a.angle() > PI { 1 } else { 0 };
+                    format!(
+                        " A {},{} 0 0,{} {},{}",
+                        a.radius,
+                        a.radius,
+                        sweep_flag,
+                        a.end.x,
+                        a.end.y
+                    )
+                }
+            }))
+                .chain(once("\"/>".to_string()))
+                .collect()
+        } else {
+            String::new()
+        }
+    }
+}
+
 /* below this point is all the dirty svg intrinsics */
 
 static FILE_COUNT: AtomicUsize = ATOMIC_USIZE_INIT;
@@ -259,7 +295,10 @@ pub fn display(quadrant: &Quadrant, svg_strings: &[String]) -> io::Result<()> {
     write!(
         svg_file,
         "viewBox=\"{} {} {} {}\" ",
-        xmin, ymin, width, height
+        xmin,
+        ymin,
+        width,
+        height
     )?;
     svg_file.write_all(b"xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n")?;
 
@@ -268,7 +307,8 @@ pub fn display(quadrant: &Quadrant, svg_strings: &[String]) -> io::Result<()> {
     write!(
         svg_file,
         "width=\"{}\" height=\"{}\" fill=\"white\"/>\n",
-        width, height
+        width,
+        height
     )?;
 
     // circle definition and stroke size

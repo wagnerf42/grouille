@@ -32,3 +32,5 @@ pub use arc::{Arc};
 pub mod elementary_path;
 pub use elementary_path::ElementaryPath;
 pub mod intersections;
+pub mod pocket;
+pub use pocket::Pocket;
