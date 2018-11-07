@@ -38,10 +38,7 @@ impl Tycat for Segment {
         //let angle = (self.end - self.start).angle();
         format!(
             "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>",
-            self.start.x,
-            self.start.y,
-            self.end.x,
-            self.end.y,
+            self.start.x, self.start.y, self.end.x, self.end.y,
         )
         //        format!(
         //            "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\
@@ -125,8 +122,7 @@ impl Tycat for HoledPolygon {
                 once(&self.outer_polygon) // clockwise
                     .chain(self.holes.iter()) // counter clockwise
                     .flat_map(|p| polygon_path(p)),
-            )
-            .chain(once("\" />".to_string()))
+            ).chain(once("\" />".to_string()))
             .collect()
     }
 }
@@ -211,24 +207,18 @@ impl Tycat for Pocket {
             let starting_point = first_path.start();
             once(format!(
                 "<path d=\"M{},{}",
-                starting_point.x,
-                starting_point.y
+                starting_point.x, starting_point.y
             )).chain(self.edge.iter().map(|p| match *p {
                 ElementaryPath::Segment(ref s) => format!(" L {} {}", s.end.x, s.end.y),
                 ElementaryPath::Arc(ref a) => {
                     let sweep_flag = if a.angle() > PI { 1 } else { 0 };
                     format!(
                         " A {},{} 0 0,{} {},{}",
-                        a.radius,
-                        a.radius,
-                        sweep_flag,
-                        a.end.x,
-                        a.end.y
+                        a.radius, a.radius, sweep_flag, a.end.x, a.end.y
                     )
                 }
-            }))
-                .chain(once("\"/>".to_string()))
-                .collect()
+            })).chain(once("\"/>".to_string()))
+            .collect()
         } else {
             String::new()
         }
@@ -295,10 +285,7 @@ pub fn display(quadrant: &Quadrant, svg_strings: &[String]) -> io::Result<()> {
     write!(
         svg_file,
         "viewBox=\"{} {} {} {}\" ",
-        xmin,
-        ymin,
-        width,
-        height
+        xmin, ymin, width, height
     )?;
     svg_file.write_all(b"xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n")?;
 
@@ -307,8 +294,7 @@ pub fn display(quadrant: &Quadrant, svg_strings: &[String]) -> io::Result<()> {
     write!(
         svg_file,
         "width=\"{}\" height=\"{}\" fill=\"white\"/>\n",
-        width,
-        height
+        width, height
     )?;
 
     // circle definition and stroke size
@@ -345,6 +331,26 @@ pub fn display(quadrant: &Quadrant, svg_strings: &[String]) -> io::Result<()> {
     svg_file.write_all(b"</g></svg>")?;
     Command::new("tycat").arg(filename).status()?;
     Ok(())
+}
+
+/// Display given iterable, one different color for every item.
+pub fn colored_display<T: Tycat, I: IntoIterator<Item = T>>(iterable: I) -> io::Result<()> {
+    let mut quadrant = Quadrant::new();
+    let mut svg_strings = Vec::new();
+    let mut colors = SVG_COLORS.iter().cycle();
+    for t in iterable {
+        quadrant.update(&t.quadrant());
+        svg_strings.push({
+            let color = colors.next().unwrap();
+            format!(
+                "<g fill=\"{}\" stroke=\"{}\">{}</g>\n",
+                color,
+                color,
+                t.svg_string()
+            )
+        });
+    }
+    display(&quadrant, &svg_strings)
 }
 
 #[macro_export]
