@@ -24,18 +24,21 @@ fn update_side_one_pass<'a, I: Iterator<Item = &'a PointIndex>, F: Fn(&PointInde
     }
 }
 
-fn update_side<C, X, Y>(
+fn update_side<X, Y>(
     edge_points: &mut HashSet<PointIndex>,
     indices: &mut [PointIndex],
-    comparison_function: C,
     score_x: X,
     score_y: Y,
 ) where
-    C: Fn(&PointIndex, &PointIndex) -> Ordering,
     X: Fn(&PointIndex) -> f64,
     Y: Fn(&PointIndex) -> f64,
 {
-    indices.sort_unstable_by(comparison_function);
+    indices.sort_unstable_by(|i1, i2| {
+            score_x(i1)
+                .partial_cmp(&score_x(i2))
+                .unwrap()
+                .then(score_y(i1).partial_cmp(&score_y(i2)).unwrap())
+    });
     update_side_one_pass(edge_points, indices.iter(), |i| score_x(i) + score_y(i));
     update_side_one_pass(edge_points, indices.iter().rev(), |i| {
         -score_x(i) + score_y(i)
@@ -52,50 +55,27 @@ fn main() {
     update_side(
         &mut edge_points,
         &mut indices,
-        |i1, i2| points[*i1].cmp(&points[*i2]),
         |i| points[*i].x,
         |i| points[*i].y,
     );
     update_side(
         &mut edge_points,
         &mut indices,
-        |i1, i2| {
-            points[*i1]
-                .x
-                .partial_cmp(&points[*i2].x)
-                .unwrap()
-                .then((-points[*i1].y).partial_cmp(&(-points[*i2].y)).unwrap())
-        },
         |i| points[*i].x,
         |i| -points[*i].y,
     );
     update_side(
         &mut edge_points,
         &mut indices,
-        |i1, i2| {
-            points[*i1]
-                .y
-                .partial_cmp(&points[*i2].y)
-                .unwrap()
-                .then((points[*i1].x).partial_cmp(&(points[*i2].x)).unwrap())
-        },
         |i| points[*i].y,
         |i| points[*i].x,
     );
     update_side(
         &mut edge_points,
         &mut indices,
-        |i1, i2| {
-            points[*i1]
-                .y
-                .partial_cmp(&points[*i2].y)
-                .unwrap()
-                .then((-points[*i1].x).partial_cmp(&(-points[*i2].x)).unwrap())
-        },
         |i| points[*i].y,
         |i| -points[*i].x,
     );
-
 
 
     let dpoints: Vec<_> = edge_points.iter().map(|i| points[*i]).collect();
