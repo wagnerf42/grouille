@@ -4,31 +4,99 @@ extern crate rand;
 use grouille::{tycat, Point};
 use itertools::repeat_call;
 use rand::random;
+use std::cmp::Ordering;
 use std::collections::HashSet;
 
 type PointIndex = usize;
 
-fn update_edge<I: Iterator<Item=PointIndex>, F: Fn(PointIndex)->f64>(edge_points: &mut HashSet<PointIndex>, points_indices: I, score_function : F) {
+fn update_side_one_pass<'a, I: Iterator<Item = &'a PointIndex>, F: Fn(&PointIndex) -> f64>(
+    edge_points: &mut HashSet<PointIndex>,
+    points_indices: I,
+    score_function: F,
+) {
     let mut best_score = std::f64::NEG_INFINITY;
     for index in points_indices {
         let score = score_function(index);
         if score > best_score {
             best_score = score;
-            edge_points.insert(index);
+            edge_points.insert(*index);
         }
     }
 }
 
+fn update_side<C, X, Y>(
+    edge_points: &mut HashSet<PointIndex>,
+    indices: &mut [PointIndex],
+    comparison_function: C,
+    score_x: X,
+    score_y: Y,
+) where
+    C: Fn(&PointIndex, &PointIndex) -> Ordering,
+    X: Fn(&PointIndex) -> f64,
+    Y: Fn(&PointIndex) -> f64,
+{
+    indices.sort_unstable_by(comparison_function);
+    update_side_one_pass(edge_points, indices.iter(), |i| score_x(i) + score_y(i));
+    update_side_one_pass(edge_points, indices.iter().rev(), |i| {
+        -score_x(i) + score_y(i)
+    });
+}
+
 fn main() {
     let points: Vec<Point> = repeat_call(|| Point::new(random(), random()))
-        .take(100)
+        .take(10_000)
         .collect();
-    let mut horizontal_points:Vec<PointIndex> = (0..points.len()).collect();
-    horizontal_points.sort_unstable_by(|&i1, &i2| points[i1].cmp(&points[i2]));
 
     let mut edge_points = HashSet::new();
-    update_edge(&mut edge_points, horizontal_points.iter().cloned(), |i| points[i].x + points[i].y);
-    update_edge(&mut edge_points, horizontal_points.iter().rev().cloned(), |i| -points[i].x + points[i].y);
+    let mut indices: Vec<PointIndex> = (0..points.len()).collect();
+    update_side(
+        &mut edge_points,
+        &mut indices,
+        |i1, i2| points[*i1].cmp(&points[*i2]),
+        |i| points[*i].x,
+        |i| points[*i].y,
+    );
+    update_side(
+        &mut edge_points,
+        &mut indices,
+        |i1, i2| {
+            points[*i1]
+                .x
+                .partial_cmp(&points[*i2].x)
+                .unwrap()
+                .then((-points[*i1].y).partial_cmp(&(-points[*i2].y)).unwrap())
+        },
+        |i| points[*i].x,
+        |i| -points[*i].y,
+    );
+    update_side(
+        &mut edge_points,
+        &mut indices,
+        |i1, i2| {
+            points[*i1]
+                .y
+                .partial_cmp(&points[*i2].y)
+                .unwrap()
+                .then((points[*i1].x).partial_cmp(&(points[*i2].x)).unwrap())
+        },
+        |i| points[*i].y,
+        |i| points[*i].x,
+    );
+    update_side(
+        &mut edge_points,
+        &mut indices,
+        |i1, i2| {
+            points[*i1]
+                .y
+                .partial_cmp(&points[*i2].y)
+                .unwrap()
+                .then((-points[*i1].x).partial_cmp(&(-points[*i2].x)).unwrap())
+        },
+        |i| points[*i].y,
+        |i| -points[*i].x,
+    );
+
+
 
     let dpoints: Vec<_> = edge_points.iter().map(|i| points[*i]).collect();
     tycat!(points, dpoints);
