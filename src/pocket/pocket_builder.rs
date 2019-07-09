@@ -24,14 +24,15 @@ pub fn build_pockets(paths: Vec<ElementaryPath>) -> Vec<Pocket> {
             if points.is_empty() {
                 None
             } else {
-                Some(build_pocket(&mut points))
+                build_pocket(&mut points)
             }
         })
         .collect()
 }
 
 /// Builds pocket obtained when following path.
-fn build_pocket(points: &mut HashMap<Point, Vec<ElementaryPath>>) -> Pocket {
+/// Discard flat ones and badly oriented ones.
+fn build_pocket(points: &mut HashMap<Point, Vec<ElementaryPath>>) -> Option<Pocket> {
     let (starting_path, remove_point) = {
         let paths = points.values_mut().next().unwrap();
         (paths.pop().unwrap(), paths.is_empty())
@@ -42,9 +43,14 @@ fn build_pocket(points: &mut HashMap<Point, Vec<ElementaryPath>>) -> Pocket {
     let mut edge = vec![starting_path];
     while edge.last().unwrap().end() != edge.first().unwrap().start() {
         edge.push(find_next_path(points, edge.last().unwrap()));
+        tycat!(edge);
     }
-    //TODO: we still need to discard the badly oriented ones
-    Pocket::new(edge)
+    let pocket = Pocket::new(edge);
+    if pocket.polygon_area() < 0.00001 {
+        None
+    } else {
+        Some(pocket)
+    }
 }
 
 fn find_next_path(
