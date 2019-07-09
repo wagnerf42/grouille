@@ -19,6 +19,13 @@ impl Segment {
         assert!(start != end);
         Segment { start, end }
     }
+    /// Rotate segment around point by given angle.
+    pub fn rotate_around(&self, center: &Point, rotation_angle: f64) -> Self {
+        Segment::new(
+            self.start.rotate_around(center, rotation_angle),
+            self.end.rotate_around(center, rotation_angle),
+        )
+    }
 
     /// Return our length
     pub fn length(&self) -> f64 {
@@ -67,8 +74,10 @@ impl Segment {
             None // almost parallel lines
         } else {
             let alpha = (d2.x * (other.start.y - self.start.y)
-                + d2.y * (self.start.x - other.start.x)) / denominator;
-            let beta = (d.x * (other.start.y - self.start.y) + d.y * (self.start.x - other.start.x))
+                + d2.y * (self.start.x - other.start.x))
+                / denominator;
+            let beta = (d.x * (other.start.y - self.start.y)
+                + d.y * (self.start.x - other.start.x))
                 / denominator;
             if (is_almost(0.0, alpha) || is_almost(1.0, alpha) || (0.0 < alpha && alpha < 1.0))
                 && (is_almost(0.0, beta) || is_almost(1.0, beta) || (0.0 < beta && beta < 1.0))

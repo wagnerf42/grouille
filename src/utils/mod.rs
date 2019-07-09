@@ -1,3 +1,4 @@
+//! provides minor functions to easy life.
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 
@@ -9,7 +10,8 @@ pub fn is_almost(f1: f64, f2: f64) -> bool {
 }
 
 pub(crate) fn min<T: Borrow<f64>, U: Borrow<f64>>(a: T, b: U) -> f64 {
-    match a.borrow()
+    match a
+        .borrow()
         .partial_cmp(b.borrow())
         .expect("failed comparing floats")
     {
@@ -19,7 +21,8 @@ pub(crate) fn min<T: Borrow<f64>, U: Borrow<f64>>(a: T, b: U) -> f64 {
 }
 
 pub(crate) fn max<T: Borrow<f64>, U: Borrow<f64>>(a: T, b: U) -> f64 {
-    match a.borrow()
+    match a
+        .borrow()
         .partial_cmp(b.borrow())
         .expect("failed comparing floats")
     {
@@ -29,7 +32,8 @@ pub(crate) fn max<T: Borrow<f64>, U: Borrow<f64>>(a: T, b: U) -> f64 {
 }
 
 pub(crate) fn min_max<C: PartialOrd + Clone, T: Borrow<C>, U: Borrow<C>>(a: T, b: U) -> [C; 2] {
-    match a.borrow()
+    match a
+        .borrow()
         .partial_cmp(b.borrow())
         .expect("failed comparing partially ordered things")
     {

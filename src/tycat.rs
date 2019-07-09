@@ -8,7 +8,7 @@ use std::io;
 use std::io::prelude::*;
 use std::iter::once;
 use std::process::Command;
-use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use {Arc, ElementaryPath, HoledPolygon, Pocket, Point, Polygon, Quadrant, Segment, Vector};
 
 /// Anything displayable in terminology needs to implement this trait.
@@ -122,7 +122,8 @@ impl Tycat for HoledPolygon {
                 once(&self.outer_polygon) // clockwise
                     .chain(self.holes.iter()) // counter clockwise
                     .flat_map(|p| polygon_path(p)),
-            ).chain(once("\" />".to_string()))
+            )
+            .chain(once("\" />".to_string()))
             .collect()
     }
 }
@@ -208,7 +209,8 @@ impl Tycat for Pocket {
             once(format!(
                 "<path d=\"M{},{}",
                 starting_point.x, starting_point.y
-            )).chain(self.edge.iter().map(|p| match *p {
+            ))
+            .chain(self.edge.iter().map(|p| match *p {
                 ElementaryPath::Segment(ref s) => format!(" L {} {}", s.end.x, s.end.y),
                 ElementaryPath::Arc(ref a) => {
                     let sweep_flag = if a.angle() > PI { 1 } else { 0 };
@@ -217,7 +219,8 @@ impl Tycat for Pocket {
                         a.radius, a.radius, sweep_flag, a.end.x, a.end.y
                     )
                 }
-            })).chain(once("\"/>".to_string()))
+            }))
+            .chain(once("\"/>".to_string()))
             .collect()
         } else {
             String::new()
@@ -227,7 +230,7 @@ impl Tycat for Pocket {
 
 /* below this point is all the dirty svg intrinsics */
 
-static FILE_COUNT: AtomicUsize = ATOMIC_USIZE_INIT;
+static FILE_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 /// Common colors
 pub const SVG_COLORS: [&str; 35] = [
@@ -353,6 +356,7 @@ pub fn colored_display<T: Tycat, I: IntoIterator<Item = T>>(iterable: I) -> io::
     display(&quadrant, &svg_strings)
 }
 
+/// Display all given objects graphically in terminology. One color each.
 #[macro_export]
 macro_rules! tycat {
     ( $($x:expr ), +) => {

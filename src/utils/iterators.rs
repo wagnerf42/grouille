@@ -4,7 +4,9 @@ use streaming_iterator::StreamingIterator;
 
 /// Returns an iterator over windows of given size (wrapping back to the beginning).
 pub trait GrouilleSlice {
+    /// Items on which we iterate. They need to implement Clone.
     type Item: Clone;
+    /// Loop on windows of given size. At the end, we wrap at the beginning.
     fn wrapping_windows<'a>(&'a self, block_size: usize)
         -> WrappingWindowsIterator<'a, Self::Item>;
 }

@@ -30,6 +30,15 @@ impl Point {
         Point { x, y }
     }
 
+    /// Rotate point around other one by given angle.
+    pub fn rotate_around(&self, other: &Point, rotation_angle: f64) -> Point {
+        let vector = self - other;
+        let angle = vector.angle() + rotation_angle;
+        let norm = vector.norm();
+        let rotated_vector = Vector::polar(norm, angle);
+        other + rotated_vector
+    }
+
     /// Return distance between two points.
     pub fn distance_to(&self, other: &Self) -> f64 {
         (other - self).norm()
