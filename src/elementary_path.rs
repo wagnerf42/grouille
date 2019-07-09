@@ -1,5 +1,6 @@
 //! provides `ElementaryPath` structure for storing segments or arcs.
-use std::f64::consts::FRAC_PI_2;
+use crate::utils::{normalize_angle, Angle};
+use std::f64::consts::{FRAC_PI_2, PI};
 use {Arc, Point, PointsHash, Segment, Vector};
 
 /// Elementary path (used for building larger paths)
@@ -24,7 +25,6 @@ impl ElementaryPath {
         rounder: &mut PointsHash,
     ) -> ElementaryPath {
         let direction = if right_side { 1.0 } else { -1.0 };
-        //TODO: use sweeping angle ?
         let angle = (segment.end - segment.start).angle() + FRAC_PI_2 * direction;
         let displacement = Vector::polar(distance, angle);
         let start = segment.start + displacement;
@@ -32,11 +32,33 @@ impl ElementaryPath {
         ElementaryPath::Segment(Segment::new(rounder.add(start), rounder.add(end)))
     }
 
-    /// Return angle when leaving start point.
-    pub fn sweeping_angle(&self) -> f64 {
+    /// Return angles when leaving start point.
+    /// We return a couple of angles.
+    /// The first one is the tangent angle, the second
+    /// one is the angle towards destination.
+    pub fn start_angles(&self) -> (Angle, Angle) {
+        let destination_angle = normalize_angle((self.end() - self.start()).angle());
         match *self {
-            ElementaryPath::Segment(s) => s.sweeping_angle(),
-            ElementaryPath::Arc(a) => unimplemented!(),
+            ElementaryPath::Segment(_) => (destination_angle, destination_angle),
+            ElementaryPath::Arc(a) => {
+                let tangent_angle = normalize_angle(PI - (a.start - a.center).angle());
+                (tangent_angle, destination_angle)
+            }
+        }
+    }
+
+    /// Return angles when arriving at end point.
+    /// We return a couple of angles.
+    /// The first one is the tangent angle, the second
+    /// one is the angle from start.
+    pub fn end_angles(&self) -> (Angle, Angle) {
+        let start_angle = normalize_angle((self.start() - self.end()).angle());
+        match *self {
+            ElementaryPath::Segment(_) => (start_angle, start_angle),
+            ElementaryPath::Arc(a) => {
+                let tangent_angle = normalize_angle(PI - (a.end - a.center).angle());
+                (tangent_angle, start_angle)
+            }
         }
     }
 

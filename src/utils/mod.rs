@@ -1,8 +1,29 @@
 //! provides minor functions to easy life.
 use std::borrow::Borrow;
 use std::cmp::Ordering;
+use std::f64::consts::PI;
 
 pub mod iterators;
+
+/// normalized f64 angle which implements Ord and Eq.
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+pub struct Angle(f64);
+
+impl Eq for Angle {}
+impl Ord for Angle {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
+/// Convert to angle in [0, 2PI).
+pub fn normalize_angle(mut a: f64) -> Angle {
+    a = a % (2.0 * PI);
+    if a < 0.0 {
+        a += 2.0 * PI;
+    }
+    Angle(a)
+}
 
 /// Are the two given floats almost equals ?
 pub fn is_almost(f1: f64, f2: f64) -> bool {

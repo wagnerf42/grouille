@@ -1,11 +1,9 @@
 extern crate grouille;
 extern crate rand;
 extern crate streaming_iterator;
-use grouille::intersections::intersect_paths;
 use grouille::tycat;
 use grouille::utils::iterators::GrouilleSlice;
 use grouille::Point;
-use grouille::PointsHash;
 use grouille::Segment;
 use rand::random;
 use std::f64::consts::PI;

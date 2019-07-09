@@ -1,4 +1,5 @@
 //! Provides `HoledPolygon` structure.
+use crate::pocket::pocket_builder::build_pockets;
 use classifier::brute_force_classification;
 use intersections::intersect_paths;
 use itertools::repeat_call;
@@ -34,6 +35,8 @@ impl HoledPolygon {
         tycat!(self.outer_polygon, paths);
         let small_paths = intersect_paths(&paths, points_hasher);
         tycat!(self.outer_polygon, small_paths);
+        let pockets = build_pockets(small_paths);
+        tycat!(self.outer_polygon, pockets);
         unimplemented!("here we are");
         unimplemented!("do a pocket builder");
         unimplemented!("do a pocket classifier");
