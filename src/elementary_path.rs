@@ -24,11 +24,20 @@ impl ElementaryPath {
         rounder: &mut PointsHash,
     ) -> ElementaryPath {
         let direction = if right_side { 1.0 } else { -1.0 };
+        //TODO: use sweeping angle ?
         let angle = (segment.end - segment.start).angle() + FRAC_PI_2 * direction;
         let displacement = Vector::polar(distance, angle);
         let start = segment.start + displacement;
         let end = segment.end + displacement;
         ElementaryPath::Segment(Segment::new(rounder.add(start), rounder.add(end)))
+    }
+
+    /// Return angle when leaving start point.
+    pub fn sweeping_angle(&self) -> f64 {
+        match *self {
+            ElementaryPath::Segment(s) => s.sweeping_angle(),
+            ElementaryPath::Arc(a) => unimplemented!(),
+        }
     }
 
     /// Return length of underlying path.
