@@ -34,6 +34,11 @@ impl HoledPolygon {
         tycat!(self.outer_polygon, paths);
         let small_paths = intersect_paths(&paths, points_hasher);
         tycat!(self.outer_polygon, small_paths);
+        unimplemented!("here we are");
+        unimplemented!("do a pocket builder");
+        unimplemented!("do a pocket classifier");
+        unimplemented!("have a holed pocket type");
+        unimplemented!("build holed pockets");
     }
 }
 
@@ -66,10 +71,10 @@ pub fn build_holed_polygons(polygons: Vec<Polygon>) -> Vec<HoledPolygon> {
 
     // polygons at even levels are outer part of holed polygon
     // at odd levels they are holes
-    let mut holed_polygons_parts: Vec<(Option<Polygon>, Vec<Polygon>)> = repeat_call(|| {
-        (None, Vec::new())
-    }).take(polygons_number)
-        .collect();
+    let mut holed_polygons_parts: Vec<(Option<Polygon>, Vec<Polygon>)> =
+        repeat_call(|| (None, Vec::new()))
+            .take(polygons_number)
+            .collect();
     for (index, mut polygon) in polygons.into_iter().enumerate() {
         if depths[index] % 2 == 0 {
             holed_polygons_parts[index].0 = Some(polygon);

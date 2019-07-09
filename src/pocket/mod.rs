@@ -1,6 +1,7 @@
 //! Provide a `Pocket` type.
-use {ElementaryPath, Quadrant};
 use tycat::Tycat;
+use {ElementaryPath, Quadrant};
+pub mod pocket_builder;
 
 /// `Polygon` equivalent, but also allowing arcs.
 pub struct Pocket {
@@ -9,8 +10,6 @@ pub struct Pocket {
     /// Quadrant containing us.
     pub(crate) quadrant: Quadrant,
 }
-
-
 
 impl Pocket {
     /// Build a new `Pocket` from given paths forming its edge.

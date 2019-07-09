@@ -24,10 +24,12 @@ fn area(points: &[Point]) -> f64 {
             vec![
                 points.last().cloned().unwrap(),
                 points.first().cloned().unwrap(),
-            ].as_slice(),
+            ]
+            .as_slice(),
         ))
         .map(|p| p[0].x * p[1].y - p[0].y * p[1].x)
-        .sum::<f64>() / 2.0
+        .sum::<f64>()
+        / 2.0
 }
 
 impl Polygon {

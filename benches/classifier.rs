@@ -3,7 +3,9 @@ extern crate criterion;
 extern crate grouille;
 
 use criterion::Criterion;
-use grouille::{classifier, overlap::remove_overlaps, polygon::polygon_builder::build_polygons, Stl};
+use grouille::{
+    classifier, overlap::remove_overlaps, polygon::polygon_builder::build_polygons, Stl,
+};
 
 fn classify_cordoba(c: &mut Criterion) {
     let mut stl = Stl::new("test_files/cordoba-very-large.stl")

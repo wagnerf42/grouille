@@ -23,5 +23,6 @@ fn main() {
         squares
             .values()
             .map(|v| v.iter().map(|i| points[*i]).collect::<Vec<Point>>()),
-    ).expect("display failed");
+    )
+    .expect("display failed");
 }

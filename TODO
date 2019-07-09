@@ -2,12 +2,14 @@
 5) arbre de classification de polygones
 -> kmerge au lieu du sort dans le brute force + interruption quand compte atteint ?
 
-6) creation de polygones a trous
 7) offsetter
-    a) decalage
-    b) intersections segments et arcs
     c) construction de poches
     d) arbre de classification des poches
+        -> abstraire polygones et poches
+        il nous faut :
+         - un y interne
+         - un quadrant
+         - toutes les intersections pour y donne
 
 8) zip des tranches de poches
     a) intersection segments et arcs

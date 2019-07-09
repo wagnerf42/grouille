@@ -34,10 +34,10 @@ fn update_side<X, Y>(
     Y: Fn(&PointIndex) -> f64,
 {
     indices.sort_unstable_by(|i1, i2| {
-            score_x(i1)
-                .partial_cmp(&score_x(i2))
-                .unwrap()
-                .then(score_y(i1).partial_cmp(&score_y(i2)).unwrap())
+        score_x(i1)
+            .partial_cmp(&score_x(i2))
+            .unwrap()
+            .then(score_y(i1).partial_cmp(&score_y(i2)).unwrap())
     });
     update_side_one_pass(edge_points, indices.iter(), |i| score_x(i) + score_y(i));
     update_side_one_pass(edge_points, indices.iter().rev(), |i| {
@@ -76,7 +76,6 @@ fn main() {
         |i| points[*i].y,
         |i| -points[*i].x,
     );
-
 
     let dpoints: Vec<_> = edge_points.iter().map(|i| points[*i]).collect();
     tycat!(points, dpoints);
