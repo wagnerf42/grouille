@@ -109,22 +109,25 @@ impl ElementaryPath {
 
     /// Iterate on all intersections (including possibly endpoints themselves)
     /// with other path.
-    pub fn intersections_with<'a>(&'a self, other: &'a Self) -> Box<Iterator<Item = Point> + 'a> {
+    pub fn intersections_with<'a>(
+        &'a self,
+        other: &'a Self,
+    ) -> Box<dyn Iterator<Item = Point> + 'a> {
         match *self {
             ElementaryPath::Arc(ref a) => match *other {
                 ElementaryPath::Arc(ref a2) => {
-                    Box::new(a.intersections_with_arc(a2)) as Box<Iterator<Item = Point>>
+                    Box::new(a.intersections_with_arc(a2)) as Box<dyn Iterator<Item = Point>>
                 }
                 ElementaryPath::Segment(ref s2) => {
-                    Box::new(a.intersections_with_segment(s2)) as Box<Iterator<Item = Point>>
+                    Box::new(a.intersections_with_segment(s2)) as Box<dyn Iterator<Item = Point>>
                 }
             },
             ElementaryPath::Segment(ref s) => match *other {
                 ElementaryPath::Arc(ref a2) => {
-                    Box::new(a2.intersections_with_segment(s)) as Box<Iterator<Item = Point>>
+                    Box::new(a2.intersections_with_segment(s)) as Box<dyn Iterator<Item = Point>>
                 }
                 ElementaryPath::Segment(ref s2) => {
-                    Box::new(s.intersection_with(s2).into_iter()) as Box<Iterator<Item = Point>>
+                    Box::new(s.intersection_with(s2).into_iter()) as Box<dyn Iterator<Item = Point>>
                 }
             },
         }

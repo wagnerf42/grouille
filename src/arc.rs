@@ -195,7 +195,12 @@ fn solve_quadratic_equation(a: f64, b: f64, c: f64) -> Vec<f64> {
     }
 }
 
-fn circles_intersections(c1: &Point, c2: &Point, r1: f64, r2: f64) -> Box<Iterator<Item = Point>> {
+fn circles_intersections(
+    c1: &Point,
+    c2: &Point,
+    r1: f64,
+    r2: f64,
+) -> Box<dyn Iterator<Item = Point>> {
     // I just solved all equations to end up with this.
     let d = c1.distance_to(c2);
     if is_almost(d, 0.0) {

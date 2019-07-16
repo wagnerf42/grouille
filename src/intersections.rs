@@ -1,4 +1,5 @@
 //! Module with different algorithms for computing intersections in a set of paths.
+// use itertools::Itertools;
 use itertools::Itertools;
 use std::iter::{empty, once, repeat};
 use std::mem;
@@ -41,18 +42,20 @@ pub fn intersect_paths(
         .iter()
         .zip(intersections.into_iter())
         .flat_map(|(path, path_intersections)| {
-            let i = path_intersections.map_or(
-                Box::new(empty()) as Box<Iterator<Item = Point>>,
-                |mut intersections| {
-                    intersections.sort_unstable_by(|i1, i2| {
-                        path.start()
-                            .distance_to(i1)
-                            .partial_cmp(&path.start().distance_to(i2))
-                            .unwrap()
-                    });
-                    Box::new(intersections.into_iter()) as Box<Iterator<Item = Point>>
-                },
+            let i = std::iter::Iterator::flatten(
+                path_intersections
+                    .map(|mut intersections| {
+                        intersections.sort_unstable_by(|i1, i2| {
+                            path.start()
+                                .distance_to(i1)
+                                .partial_cmp(&path.start().distance_to(i2))
+                                .unwrap()
+                        });
+                        intersections
+                    })
+                    .into_iter(),
             );
+
             once(*path.start())
                 .chain(i)
                 .chain(once(*path.end()))
