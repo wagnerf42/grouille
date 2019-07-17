@@ -6,17 +6,21 @@ use grouille::Polygon;
 
 fn main() {
     let s = Polygon::square(0.0, 0.0, 50.0);
-    let mut a = Polygon::square(20.0, 2.0, 10.0);
-    let mut b = Polygon::square(20.0, 38.0, 10.0);
-    let mut c = Polygon::square(2.0, 15.0, 20.0);
-    let mut d = Polygon::square(28.0, 15.0, 20.0);
-    tycat!(s, a, b, c, d);
+    let mut holes = vec![
+        Polygon::square(20.0, 2.0, 10.0),
+        //Polygon::square(20.0, 38.0, 10.0),
+        //Polygon::square(2.0, 15.0, 20.0),
+        //Polygon::square(28.0, 15.0, 20.0),
+    ];
+    tycat!(s, holes);
 
-    let holed_polygon = grouille::holed_polygon::build_holed_polygons(vec![s, a, b, c, d])
+    holes.push(s);
+    let holed_polygon = grouille::holed_polygon::build_holed_polygons(holes)
         .pop()
         .unwrap();
     tycat!(holed_polygon);
 
     let mut hasher = PointsHash::new(0.000001);
-    holed_polygon.offset(6.0, &mut hasher);
+    //holed_polygon.offset(3.0, &mut hasher); // TODO: debug me
+    holed_polygon.offset(2.0, &mut hasher);
 }

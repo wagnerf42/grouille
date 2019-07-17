@@ -50,6 +50,7 @@ fn build_pocket(
 
     let mut edge = vec![starting_path];
     while edge.last().unwrap().end() != edge.first().unwrap().start() {
+        tycat!(edge);
         edge.push(find_next_path(
             points,
             edge.last().unwrap().end(),
