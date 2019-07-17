@@ -34,3 +34,4 @@ pub use elementary_path::ElementaryPath;
 pub mod intersections;
 pub mod pocket;
 pub use pocket::Pocket;
+pub(crate) mod shape;
