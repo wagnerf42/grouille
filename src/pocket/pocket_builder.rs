@@ -28,9 +28,10 @@ pub fn build_pockets(paths: Vec<ElementaryPath>) -> Vec<Pocket> {
             if points.is_empty() {
                 None
             } else {
-                build_pocket(&mut points)
+                Some(build_pocket(&mut points))
             }
         })
+        .flatten()
         .collect()
 }
 
