@@ -39,6 +39,17 @@ impl Polygon {
         Polygon { points, quadrant }
     }
 
+    /// Create a horizontally aligned square and given coordinates.
+    pub fn square(x: f64, y: f64, side: f64) -> Self {
+        let points = vec![
+            Point::new(x, y),
+            Point::new(x + side, y),
+            Point::new(x + side, y + side),
+            Point::new(x, y + side),
+        ];
+        Polygon::new(points)
+    }
+
     /// Return our points as a slice (read only).
     pub fn points<'a>(&'a self) -> &'a [Point] {
         &self.points
