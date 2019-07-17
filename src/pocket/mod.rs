@@ -1,6 +1,6 @@
 //! Provide a `Pocket` type.
 use tycat::Tycat;
-use {ElementaryPath, Polygon, Quadrant};
+use {ElementaryPath, Point, Polygon, Quadrant};
 pub mod pocket_builder;
 
 /// `Polygon` equivalent, but also allowing arcs.
@@ -19,6 +19,11 @@ impl Pocket {
             quadrant.update(&path.quadrant());
         }
         Pocket { edge, quadrant }
+    }
+
+    /// Iterate on all our points.
+    pub fn points(&self) -> impl Iterator<Item = &Point> {
+        self.edge.iter().map(|p| p.start())
     }
 
     /// Return the area of the polygon obtained when converting arcs to segments.

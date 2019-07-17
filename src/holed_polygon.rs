@@ -37,9 +37,6 @@ impl HoledPolygon {
         tycat!(self.outer_polygon, small_paths);
         let pockets = build_pockets(small_paths);
         tycat!(self.outer_polygon, pockets);
-        unimplemented!("here we are");
-        unimplemented!("do a pocket builder");
-        unimplemented!("do a pocket classifier");
         unimplemented!("have a holed pocket type");
         unimplemented!("build holed pockets");
     }
