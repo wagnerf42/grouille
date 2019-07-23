@@ -26,6 +26,8 @@ pub mod classifier;
 pub mod holed_polygon;
 pub mod slice;
 pub use holed_polygon::HoledPolygon;
+pub mod holed_pocket;
+pub use holed_pocket::HoledPocket;
 pub mod arc;
 pub mod utils;
 pub use arc::Arc;

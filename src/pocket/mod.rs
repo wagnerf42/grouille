@@ -4,6 +4,7 @@ use {ElementaryPath, Point, Polygon, Quadrant};
 pub mod pocket_builder;
 
 /// `Polygon` equivalent, but also allowing arcs.
+#[derive(Debug)]
 pub struct Pocket {
     /// All paths forming the pocket, one after the other.
     pub(crate) edge: Vec<ElementaryPath>,

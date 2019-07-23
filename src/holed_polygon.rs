@@ -3,8 +3,9 @@ use crate::pocket::pocket_builder::build_pockets;
 use classifier::brute_force_classification;
 use intersections::intersect_paths;
 use itertools::repeat_call;
+use std::collections::HashMap;
 use std::iter::repeat;
-use {PointsHash, Polygon};
+use {HoledPocket, Pocket, PointsHash, Polygon};
 
 /// polygon with (optional) holes inside.
 #[derive(Debug)]
@@ -27,18 +28,33 @@ impl HoledPolygon {
     }
 
     /// Offset holed polygon into holed pockets
-    pub fn offset(&self, radius: f64, points_hasher: &mut PointsHash) {
+    pub fn offset(&self, radius: f64, points_hasher: &mut PointsHash) -> Vec<HoledPocket> {
         let mut paths = self.outer_polygon.inner_paths(radius, points_hasher);
         for hole in &self.holes {
             paths.append(&mut hole.inner_paths(radius, points_hasher));
         }
-        tycat!(self.outer_polygon, paths);
         let small_paths = intersect_paths(&paths, points_hasher);
-        tycat!(self.outer_polygon, small_paths);
         let pockets = build_pockets(small_paths);
-        tycat!(self.outer_polygon, pockets);
-        unimplemented!("have a holed pocket type");
-        unimplemented!("build holed pockets");
+        // only roots are kept (and their direct children as holes)
+        let (_, roots, fathers) = brute_force_classification(&pockets);
+        let mut holes: HashMap<usize, Vec<Pocket>> =
+            roots.iter().map(|k| (*k, Vec::new())).collect();
+        let mut holed_pockets: HashMap<usize, HoledPocket> = HashMap::new();
+        for ((index, pocket), father) in pockets.into_iter().enumerate().zip(fathers) {
+            if father >= 0 {
+                holes.get_mut(&(father as usize)).unwrap().push(pocket);
+            } else {
+                holed_pockets.insert(index, HoledPocket::new(pocket, Vec::new()));
+            }
+        }
+        let mut final_pockets = Vec::new();
+        for (father, (_, mut holed_pocket)) in holed_pockets.into_iter().enumerate() {
+            if let Some(pocket_holes) = holes.remove(&father) {
+                holed_pocket.holes = pocket_holes;
+            }
+            final_pockets.push(holed_pocket);
+        }
+        final_pockets
     }
 }
 
