@@ -9,6 +9,8 @@ use std::collections::HashMap;
 /// Flat pockets are discarded in the process.
 pub fn build_pockets(paths: Vec<ElementaryPath>) -> Vec<Pocket> {
     let mut points: HashMap<Point, Vec<((Angle, Angle), Option<ElementaryPath>)>> = HashMap::new();
+    // for path in crate::overlap::remove_segments_overlaps(paths) { // maybe we could avoid it
+    // with a smarter key
     for path in paths {
         points
             .entry(path.end().clone())
@@ -50,7 +52,6 @@ fn build_pocket(
 
     let mut edge = vec![starting_path];
     while edge.last().unwrap().end() != edge.first().unwrap().start() {
-        tycat!(edge);
         edge.push(find_next_path(
             points,
             edge.last().unwrap().end(),

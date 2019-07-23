@@ -13,7 +13,7 @@ pub fn slice<P: AsRef<Path>>(stl_file: P, thickness: f64) -> Result<(), Error> {
     let mut stl = Stl::new(stl_file)?;
     let mut points_hasher = PointsHash::new(0.001);
     let slices = stl.cut(thickness, &mut points_hasher);
-    for slice in &slices {
+    for slice in slices {
         let remaining_segments = remove_overlaps(slice);
         let polygons = build_polygons(&remaining_segments);
         tycat!(&polygons);

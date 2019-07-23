@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate grouille;
+use grouille::utils::normalize_angle;
 use grouille::{Point, Segment};
 
 fn main() {
@@ -17,8 +18,8 @@ fn main() {
     let segments: Vec<Segment> = points.iter().map(|&p| Segment::new(o, p)).collect();
 
     for segment in &segments {
-        let angle = segment.sweeping_angle();
-        println!("angle de {:?} : {}", segment, angle.to_degrees());
+        let angle = normalize_angle((segment.end - segment.start).angle());
+        println!("angle de {:?} : {:?}", segment, angle);
         tycat!(o, segments, segment);
     }
 }

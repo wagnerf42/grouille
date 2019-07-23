@@ -41,7 +41,7 @@ impl ElementaryPath {
         match *self {
             ElementaryPath::Segment(_) => (destination_angle, destination_angle),
             ElementaryPath::Arc(a) => {
-                let tangent_angle = normalize_angle(PI - (a.start - a.center).angle());
+                let tangent_angle = normalize_angle((a.start - a.center).angle() - PI / 2.0);
                 (tangent_angle, destination_angle)
             }
         }
@@ -56,7 +56,7 @@ impl ElementaryPath {
         match *self {
             ElementaryPath::Segment(_) => (start_angle, start_angle),
             ElementaryPath::Arc(a) => {
-                let tangent_angle = normalize_angle(PI - (a.end - a.center).angle());
+                let tangent_angle = normalize_angle((a.end - a.center).angle() + PI / 2.0);
                 (tangent_angle, start_angle)
             }
         }
