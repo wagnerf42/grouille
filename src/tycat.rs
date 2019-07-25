@@ -9,7 +9,10 @@ use std::io::prelude::*;
 use std::iter::once;
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use {Arc, ElementaryPath, HoledPolygon, Pocket, Point, Polygon, Quadrant, Segment, Vector};
+use {
+    Arc, ElementaryPath, HoledPocket, HoledPolygon, Pocket, Point, Polygon, Quadrant, Segment,
+    Vector,
+};
 
 /// Anything displayable in terminology needs to implement this trait.
 pub trait Tycat {
@@ -122,6 +125,46 @@ impl Tycat for HoledPolygon {
                 once(&self.outer_polygon) // clockwise
                     .chain(self.holes.iter()) // counter clockwise
                     .flat_map(|p| polygon_path(p)),
+            )
+            .chain(once("\" />".to_string()))
+            .collect()
+    }
+}
+
+/// Turn pocket into svg path.
+fn pocket_path<'a>(pocket: &'a Pocket) -> impl Iterator<Item = String> + 'a {
+    pocket
+        .edge
+        .first()
+        .map(|first_path| {
+            let starting_point = first_path.start();
+            once(format!("M{},{}", starting_point.x, starting_point.y)).chain(
+                pocket.edge.iter().map(|p| match *p {
+                    ElementaryPath::Segment(ref s) => format!(" L {} {}", s.end.x, s.end.y),
+                    ElementaryPath::Arc(ref a) => {
+                        let sweep_flag = if a.angle() > PI { 1 } else { 0 };
+                        format!(
+                            " A {},{} 0 0,{} {},{}",
+                            a.radius, a.radius, sweep_flag, a.end.x, a.end.y
+                        )
+                    }
+                }),
+            )
+        })
+        .into_iter()
+        .flatten()
+}
+
+impl Tycat for HoledPocket {
+    fn quadrant(&self) -> Quadrant {
+        self.outer_pocket.quadrant
+    }
+    fn svg_string(&self) -> String {
+        once("<path d=\"".to_string())
+            .chain(
+                once(&self.outer_pocket) // clockwise
+                    .chain(self.holes.iter()) // counter clockwise
+                    .flat_map(|p| pocket_path(p)),
             )
             .chain(once("\" />".to_string()))
             .collect()

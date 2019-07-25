@@ -1,9 +1,9 @@
 //! functions to handle overlapping segments.
 use std::collections::HashMap;
-use {CoordinatesHash, HashKey, Point, Segment};
+use {CoordinatesHash, ElementaryPath, HashKey, Point, Segment};
 
 /// Remove overlapping segments.
-pub fn remove_overlaps(segments: &[Segment]) -> Vec<Segment> {
+pub fn remove_overlaps<S: IntoIterator<Item = Segment>>(segments: S) -> Vec<Segment> {
     let mut angles_hasher = CoordinatesHash::new(0.0001);
     let mut coordinates_hasher = CoordinatesHash::new(0.0001);
     let mut lines: HashMap<(HashKey, HashKey), HashMap<Point, isize>> = HashMap::new();
@@ -34,4 +34,25 @@ pub fn remove_overlaps(segments: &[Segment]) -> Vec<Segment> {
         }
     }
     non_overlapping_segments
+}
+
+/// Remove all overlapping parts from our segments.
+pub fn remove_segments_overlaps(
+    paths: Vec<ElementaryPath>,
+) -> impl Iterator<Item = ElementaryPath> {
+    let mut elementary_segments = Vec::new();
+    let mut remaining_paths = Vec::new();
+    for path in paths {
+        match path {
+            ElementaryPath::Segment(s) => elementary_segments.push(s),
+            a @ ElementaryPath::Arc(_) => remaining_paths.push(a),
+        }
+    }
+    unimplemented!("TODO: we cannot call remove_overlaps here");
+    // because these segments are ORIENTED
+    remaining_paths.into_iter().chain(
+        remove_overlaps(elementary_segments)
+            .into_iter()
+            .map(|s| ElementaryPath::Segment(s)),
+    )
 }
