@@ -41,7 +41,7 @@ impl HoledPolygon {
             roots.iter().map(|k| (*k, Vec::new())).collect();
         let mut holed_pockets: HashMap<usize, HoledPocket> = HashMap::new();
         for ((index, pocket), father) in pockets.into_iter().enumerate().zip(fathers) {
-            if father >= 0 {
+            if father as usize != index {
                 holes.get_mut(&(father as usize)).unwrap().push(pocket);
             } else {
                 holed_pockets.insert(index, HoledPocket::new(pocket, Vec::new()));
