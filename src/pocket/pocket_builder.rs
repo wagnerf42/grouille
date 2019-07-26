@@ -1,9 +1,11 @@
 //! build polygons by looping on outer edges.
+use crate::utils::iterators::GrouilleSlice;
 use crate::utils::Angle;
 use elementary_path::ElementaryPath;
 use pocket::Pocket;
 use point::Point;
 use std::collections::HashMap;
+use streaming_iterator::StreamingIterator;
 
 /// Converts elementary paths into oriented pockets (clockwise) by following edges.
 /// Flat pockets are discarded in the process.
@@ -23,6 +25,7 @@ pub fn build_pockets(paths: Vec<ElementaryPath>) -> Vec<Pocket> {
     }
     for neighbours in points.values_mut() {
         neighbours.sort_by_key(|&(a, _)| a);
+        debug_assert!(neighbours.wrapping_windows(2).all(|w| w[0].0 != w[1].0));
     }
 
     (0..)

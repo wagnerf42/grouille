@@ -61,6 +61,11 @@ pub fn intersect_paths(
                 .chain(once(*path.end()))
                 .dedup()
                 .tuple_windows()
+                .inspect(|(p1, p2)| {
+                    if p1.distance_to(p2) < 0.0001 {
+                        eprintln!("warning: very short distance between {:?} and {:?}", p1, p2);
+                    }
+                })
                 .map(move |(p1, p2)| path.sub_path(p1, p2))
         })
         .collect();
