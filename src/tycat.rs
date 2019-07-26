@@ -322,8 +322,17 @@ pub fn display(quadrant: &Quadrant, svg_strings: &[String]) -> io::Result<()> {
     println!("[{}]", file_number);
     let mut svg_file = File::create(&filename)?;
 
+    let var = std::env::var("TYCAT_DIMENSIONS").unwrap_or("640x480".to_string());
+    let mut sizes = var.split('x');
+    let svg_width: f64 = sizes.next().unwrap().parse().unwrap();
+    let svg_height: f64 = sizes.next().unwrap().parse().unwrap();
+
     // write header
-    svg_file.write_all(b"<svg width=\"640\" height=\"480\" ")?;
+    write!(
+        svg_file,
+        "<svg width=\"{}\" height=\"{}\" ",
+        svg_width, svg_height
+    )?;
     let (xmin, xmax) = quadrant.limits(0);
     let (ymin, ymax) = quadrant.limits(1);
     let width = xmax - xmin;
@@ -344,8 +353,8 @@ pub fn display(quadrant: &Quadrant, svg_strings: &[String]) -> io::Result<()> {
     )?;
 
     // circle definition and stroke size
-    let xscale = 640.0 / width;
-    let yscale = 480.0 / height;
+    let xscale = svg_width / width;
+    let yscale = svg_height / height;
     let scale = if xscale < yscale { xscale } else { yscale };
     let stroke = 3.0 / scale;
     write!(svg_file, "<defs>\n")?;

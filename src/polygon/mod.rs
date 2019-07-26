@@ -229,7 +229,7 @@ impl Polygon {
             .wrapping_windows(2)
             .map(|s| (*s[0].end(), *s[1].start()))
             .cloned()
-            .zip(self.points.iter().cycle().skip(1))
+            .zip(self.points.iter().cycle().skip(2))
             .map(|(s, c)| ElementaryPath::Arc(Arc::new(s.0, s.1, *c, radius)))
             .collect();
         segments.append(&mut arcs);
